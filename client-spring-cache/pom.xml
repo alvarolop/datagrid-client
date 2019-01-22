@@ -9,9 +9,9 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.example</groupId>
-	<artifactId>client-spring-basic</artifactId>
+	<artifactId>client-spring-cache</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>client-spring-basic</name>
+	<name>client-spring-cache</name>
 	<description>Demo project for Spring Boot</description>
 
 	<properties>
@@ -90,6 +90,23 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
+            <!-- This plugin permits the execution of this quickstart 
+                through mvn exec:java command -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>${exec.plugin.version}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <mainClass>${main.class.hotrod-endpoint}</mainClass>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 
