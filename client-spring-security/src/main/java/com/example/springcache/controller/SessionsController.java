@@ -15,39 +15,45 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class SessionsController {
-
-   @Autowired
-   SpringRemoteCacheManager cacheManager;
-
-   @GetMapping("/sessions")
-   public Map<String, String> session(HttpServletRequest request) {
-      Map<String, String> result = new HashMap<>();
-      String sessionId = request.getSession(true).getId();
-      result.put("created:", sessionId);
-      // By default Infinispan integration for Spring Session will use 'sessions' cache.
-      result.put("active:", cacheManager.getCache("sessions").getNativeCache().keySet().toString());
-      return result;
-   }
-   
-   @GetMapping("/session")
-   String getSessionId(HttpSession session) {
-       return session.getId();
-   }
-   
-   @SuppressWarnings("unchecked")
-   @GetMapping("/sessionattributes")
-   String getSessionAttributes(HttpSession session) {
-	   // https://docs.spring.io/spring-session/docs/current/api/org/springframework/session/MapSession.html
-	   RemoteCache<String, MapSession> cache = (RemoteCache<String, MapSession>) cacheManager.getCache("sessions").getNativeCache();
-	   MapSession mapSession = cache.get(session.getId());
-       return mapSession.getAttributeNames().toString();
-   }
-   @SuppressWarnings("unchecked")
-   @GetMapping("/sessionexpired")
-   String isSessionExpired(HttpSession session) {
-	   // https://docs.spring.io/spring-session/docs/current/api/org/springframework/session/MapSession.html
-	   RemoteCache<String, MapSession> cache = (RemoteCache<String, MapSession>) cacheManager.getCache("sessions").getNativeCache();
-	   MapSession mapSession = cache.get(session.getId());
-       return Boolean.toString(mapSession.isExpired());
-   }
+	
+	@Autowired
+	SpringRemoteCacheManager cacheManager;
+	
+	@GetMapping("/sessions")
+	public Map<String, String> session(HttpServletRequest request) {
+		Map<String, String> result = new HashMap<>();
+		String sessionId = request.getSession(true).getId();
+		result.put("created:", sessionId);
+		// By default Infinispan integration for Spring Session will use 'sessions' cache.
+		result.put("active:", cacheManager.getCache("sessions").getNativeCache().keySet().toString());
+		return result;
+	}
+	
+	@GetMapping("/session")
+	String getSessionId(HttpSession session) {
+		return session.getId();
+	}
+	
+	@SuppressWarnings("unchecked")
+	@GetMapping("/sessionattributes")
+    String getSessionAttributes(HttpSession session) {
+		// https://docs.spring.io/spring-session/docs/current/api/org/springframework/session/MapSession.html
+		RemoteCache<String, MapSession> cache = (RemoteCache<String, MapSession>) cacheManager.getCache("sessions").getNativeCache();
+		MapSession mapSession = cache.get(session.getId());
+		
+		Map<String, String> value = new HashMap<String, String>();
+		for (String key: mapSession.getAttributeNames()) {
+			value.put(key, mapSession.getAttribute(key).toString());
+		}
+		return value.toString();
+	}
+	
+	@SuppressWarnings("unchecked")
+	@GetMapping("/sessionexpired")
+	String isSessionExpired(HttpSession session) {
+		// https://docs.spring.io/spring-session/docs/current/api/org/springframework/session/MapSession.html
+		  RemoteCache<String, MapSession> cache = (RemoteCache<String, MapSession>) cacheManager.getCache("sessions").getNativeCache();
+		  MapSession mapSession = cache.get(session.getId());
+		  return Boolean.toString(mapSession.isExpired());
+	}
 }
