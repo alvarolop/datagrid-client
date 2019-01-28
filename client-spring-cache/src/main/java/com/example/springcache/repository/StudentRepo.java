@@ -7,7 +7,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
-import com.example.springcache.domain.Student;
+import com.example.springcache.model.Student;
 
 @Service
 @CacheConfig(cacheNames="student")

@@ -12,7 +12,6 @@ import org.springframework.context.annotation.Configuration;
 
 @EnableCaching
 @Configuration
-//@PropertySource("classpath:application.properties")
 public class RemoteCacheConfig {
 	
 	@Value("${datagrid.host}")

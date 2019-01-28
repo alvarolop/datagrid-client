@@ -1,8 +1,11 @@
-package com.example.springcache.domain;
+package com.example.springcache.model;
 
 import java.io.Serializable;
 
 public class Student implements Serializable{
+
+	private static final long serialVersionUID = 6012152925385051324L;
+	
 	String id;
 	String name;
 	String clz;

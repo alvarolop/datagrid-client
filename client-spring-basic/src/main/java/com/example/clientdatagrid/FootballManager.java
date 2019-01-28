@@ -5,27 +5,27 @@ import java.io.Console;
 import org.infinispan.client.hotrod.RemoteCache;
 import org.infinispan.client.hotrod.RemoteCacheManager;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.infinispan.client.hotrod.configuration.Configuration;
 import org.infinispan.client.hotrod.configuration.ConfigurationBuilder;
-import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 
 /**
  * @author Martin Gencur
  */
-//@Configuration
-//@PropertySource("classpath:application.properties")
-//@ConfigurationProperties(prefix="jdg.hotrod")
+
+
 public class FootballManager {
 	
-    private String host = "node1.dg.vm";
-    private int port = 11222;
+	@Value("${datagrid.host}")
+	private String host = "node1.dg.vm";
+
+	@Value("${datagrid.port}")
+	private int port = 11222;
 
     private static final String msgTeamMissing = "The specified team \"%s\" does not exist, choose next operation\n";
     private static final String msgEnterTeamName = "Enter team name: ";
