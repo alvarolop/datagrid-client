@@ -2,6 +2,7 @@ package com.example.clientdatagrid;
 
 import java.io.Console;
 
+import org.springframework.beans.factory.annotation.Autowired;
 //import org.slf4j.Logger;
 //import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
@@ -16,6 +17,9 @@ public class ClientDatagridApplication implements CommandLineRunner {
     private static final String initialPrompt = "Choose action:\n" + "============= \n" + "at  -  add a team\n"
             + "ap  -  add a player to a team\n" + "rt  -  remove a team\n" + "rp  -  remove a player from a team\n"
             + "p   -  print all teams and players\n" + "q   -  quit\n";
+    
+//    @Autowired
+    FootballManager manager;
 	    
 	public static void main(String[] args) {
 		SpringApplication.run(ClientDatagridApplication.class, args);
@@ -25,7 +29,7 @@ public class ClientDatagridApplication implements CommandLineRunner {
     public void run(String... args) { 
         
         Console con = System.console();
-        FootballManager manager = new FootballManager(con);
+        manager = new FootballManager(con);
         con.printf(initialPrompt);
 
         while (true) {

@@ -11,20 +11,25 @@ import java.util.List;
 import org.infinispan.client.hotrod.configuration.Configuration;
 import org.infinispan.client.hotrod.configuration.ConfigurationBuilder;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
+import org.springframework.context.annotation.Bean;
 
 /**
  * @author Martin Gencur
  */
 
-
+//@PropertySource("classpath:datagrid.properties")
+//@org.springframework.context.annotation.Configuration
+//@ComponentScan
+//@Component
 public class FootballManager {
 	
-	@Value("${datagrid.host}")
+//	@Value("${datagrid.host}")
 	private String host = "node1.dg.vm";
 
-	@Value("${datagrid.port}")
+//	@Value("${datagrid.port}")
 	private int port = 11222;
 
     private static final String msgTeamMissing = "The specified team \"%s\" does not exist, choose next operation\n";

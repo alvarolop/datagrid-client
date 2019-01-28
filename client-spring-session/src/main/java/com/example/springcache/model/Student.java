@@ -8,13 +8,17 @@ public class Student implements Serializable{
 	
 	String id;
 	String name;
-	String clz;
+	String email;
 
-	public Student(String id, String name, String clz) {
+	public Student(String id, String name, String email) {
 		super();
 		this.id = id;
 		this.name = name;
-		this.clz = clz;
+		this.email = email;
+	}
+	
+	public String getId() {
+		return id;
 	}
 
 	public String getName() {
@@ -25,12 +29,16 @@ public class Student implements Serializable{
 		this.name = name;
 	}
 
-	public String getClz() {
-		return clz;
+	public String getEmail() {
+		return email;
 	}
 
-	public void setClz(String clz) {
-		this.clz = clz;
+	public void setEmail(String email) {
+		this.email = email;
 	}
 
+	@Override
+	public String toString() {
+		return "Student [id=" + id + ", name=" + name + ", email=" + email + "]";
+	}
 }

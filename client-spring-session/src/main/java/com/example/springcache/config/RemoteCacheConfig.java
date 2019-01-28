@@ -49,7 +49,7 @@ public class RemoteCacheConfig {
 	
 	// An optional configuration bean that replaces the default cookie for obtaining configuration.
 	// For more information refer to Spring Session documentation.
-	// This Bean gives one different session each time the tab is refreshed.  
+	// Alvaro: This Bean gives one different session each time the tab is refreshed.  
 //	@Bean
 //	public HttpSessionStrategy httpSessionStrategy() {
 //		return new HeaderHttpSessionStrategy();
