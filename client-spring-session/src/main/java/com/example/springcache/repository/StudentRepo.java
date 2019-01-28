@@ -4,9 +4,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
+import com.example.springcache.controller.StudentNotFoundException;
 import com.example.springcache.model.Student;
 
 @Service
@@ -14,19 +16,24 @@ import com.example.springcache.model.Student;
 public class StudentRepo {
 	
     Logger log = LoggerFactory.getLogger(this.getClass());
-
-	
-	@Cacheable(key = "#id")
-	public Student getStudentByID(String id) {
-		log.info("---> Loading student with id '" + id + "'");
+    
+	@CachePut(key = "#student.id")
+	public Student putStudent(Student student) {
+		log.info("---> Creating student with id '" + student.getId() + ": " + student.toString() + "'");
 		try {
 			Thread.sleep(1000*5);
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+			return null;
 		}
-		return new Student(id,"Sajal" , String.valueOf(id));
-		
+		return new Student(student.getId(),student.getName() , student.getEmail());
+	}
+	
+	
+	@Cacheable(key = "#id", unless="#result == null")
+	public Student getStudentByID(String id) throws StudentNotFoundException {
+		log.info("---> Student with id '" + id + "' not cached");
+		throw new StudentNotFoundException("Student with id: " + id + " not found.");
 	}
 	
 	@CacheEvict
@@ -38,18 +45,5 @@ public class StudentRepo {
 	public void evictStudents() {
 		log.info("---> Evict All Entries.");
 	}
-	
-//	@Cacheable
-//	public Student getStudents() {
-//		log.info("---> Loading student with id '" + id + "'");
-//		try {
-//			Thread.sleep(1000*5);
-//		} catch (InterruptedException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//		return new Student(id,"Sajal" , String.valueOf(id));
-//		
-//	}
 	
 }
