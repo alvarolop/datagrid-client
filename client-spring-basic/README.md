@@ -110,16 +110,27 @@ Start JDG
         For Windows: %JDG_HOME%\bin\standalone.bat
 
 
+
 Build and Run the Quickstart
 ----------------------------
 
 _NOTE: The following build command assumes you have configured your Maven user settings. If you have not, you must include Maven setting arguments on the command line. See [Build and Deploy the Quickstarts](../../README.md#build-and-deploy-the-quickstarts) for complete instructions and additional options._
 
 1. Make sure you have started the JDG as described above.
-2. Open a command line and navigate to the root directory of this quickstart.
-3. Type this command to build and deploy the archive:
+2. Modify com.example.clientdatagrid.FootballManager providing the correct values of the host and port of your Data Grid server.
+3. Open a command line and navigate to the root directory of this quickstart.
+4. Type this command to build and deploy the archive:
 
         mvn clean spring-boot:run
+
+Deploy the Quickstart on JWS/Tomcat 
+-----------------------------------
+
+Build the application using the following command:
+
+        mvn clean package
+
+Deploy it to JWS/Tomcat using your favorite technique.
  
 
 Using the application

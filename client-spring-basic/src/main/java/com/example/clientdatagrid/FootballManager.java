@@ -20,17 +20,14 @@ import org.springframework.context.annotation.Bean;
  * @author Martin Gencur
  */
 
-//@PropertySource("classpath:datagrid.properties")
-//@org.springframework.context.annotation.Configuration
-//@ComponentScan
-//@Component
 public class FootballManager {
 	
-//	@Value("${datagrid.host}")
+	//
+	// Modify these variables to point to your datagrid server
+	//
 	private String host = "node1.dg.vm";
-
-//	@Value("${datagrid.port}")
 	private int port = 11222;
+	
 
     private static final String msgTeamMissing = "The specified team \"%s\" does not exist, choose next operation\n";
     private static final String msgEnterTeamName = "Enter team name: ";
