@@ -119,13 +119,7 @@ _NOTE: The following build command assumes you have configured your Maven user s
 2. Open a command line and navigate to the root directory of this quickstart.
 3. Type this command to build and deploy the archive:
 
-        mvn clean package 
-                
-4. This will create a file at `target/jboss-hotrod-endpoint-quickstart.jar`
-
-5. Run the example application in its directory:
-
-        mvn exec:java
+        mvn clean spring-boot:run
  
 
 Using the application
@@ -140,31 +134,6 @@ Basic usage scenarios can look like this (keyboard shortcuts will be shown to yo
         q   -  quit
         
 Type `q` one more time to exit the application.
-
-Run application with different classpath
-----------------------------------------
-It's possible to run this quickstart with different classpath (other than default created by mvn exec:java).
-To do this, compile quickstart with:
-
-        mvn clean package -Pcustom-classpath -Dclasspath=/custom/classpath/directory
-
-This will create a file at `target/jboss-hotrod-endpoint-quickstart.jar`.
-Then you can run it with:
-
-        java -jar target/jboss-hotrod-endpoint-quickstart.jar
-
-Debug the Application
-------------------------------------
-
-If you want to debug the source code or look at the Javadocs of any library in the project, run either of the following commands to pull them into your local repository. The IDE should then detect them.
-
-    mvn dependency:sources
-    mvn dependency:resolve -Dclassifier=javadoc
-
-
-
-
-
 
 
 

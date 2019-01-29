@@ -22,4 +22,4 @@ The repository contains four Spring Boot RHDG clients: client-spring-basic, clie
 
 
 ## Running the Quickstarts
-Refer to the `README` file in each quickstart directory for instructions on building and running the quickstart.
+Refer to the `README` file in each quickstart directory for instructions on building and running them.
