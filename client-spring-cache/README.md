@@ -48,7 +48,8 @@ Where:
 - The infinispanCacheManager() method initializes the Hot Rod client as it was done in the client-spring-basic example.
 
 
-After configuring this org.infinispan.spring.provider.SpringRemoteCacheManager you can use regular Spring Cache annotations. In this example, the StudentRepo class is the layer that interacts with the cache and the class that uses these annotations.
+After configuring this org.infinispan.spring.provider.SpringRemoteCacheManager you can use regular Spring Cache annotations. 
+
 ```java
 @Service
 @CacheConfig(cacheNames="student")
