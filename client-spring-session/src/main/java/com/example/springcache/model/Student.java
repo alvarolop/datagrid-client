@@ -9,6 +9,10 @@ public class Student implements Serializable{
 	String id;
 	String name;
 	String email;
+	
+	public Student() {
+		
+	}
 
 	public Student(String id, String name, String email) {
 		super();
