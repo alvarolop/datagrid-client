@@ -17,6 +17,7 @@ import java.util.Arrays;
 import java.util.Random;
 
 @RestController
+@org.springframework.context.annotation.Configuration
 public class Tester {
 
     @Autowired
@@ -27,9 +28,7 @@ public class Tester {
     
     @GetMapping("/api/info")
     public String info() {
-
             return "This is the value of datagrid.test: " + test + "\n";
-
     }
 
 
