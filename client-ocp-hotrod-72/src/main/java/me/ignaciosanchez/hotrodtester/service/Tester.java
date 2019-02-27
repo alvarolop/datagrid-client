@@ -7,6 +7,7 @@ import org.infinispan.configuration.cache.CacheMode;
 import org.infinispan.configuration.cache.Configuration;
 import org.infinispan.configuration.cache.ConfigurationBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -20,6 +21,16 @@ public class Tester {
 
     @Autowired
     RemoteCacheManager rcm;
+    
+    @Value("${datagrid.test}")
+    private String test;
+    
+    @GetMapping("/api/info")
+    public String info() {
+
+            return "This is the value of datagrid.test: " + test + "\n";
+
+    }
 
 
     @GetMapping("/api/health")
