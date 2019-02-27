@@ -20,7 +20,7 @@ public class Config {
     private String port;
 
     @Bean
-    public CacheManager cacheManager() {
+    public SpringRemoteCacheManager cacheManager() {
         return new SpringRemoteCacheManager(infinispanCacheManager());
     }
 
