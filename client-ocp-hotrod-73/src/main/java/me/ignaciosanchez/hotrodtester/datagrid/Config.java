@@ -37,10 +37,8 @@ public class Config {
     @Bean
     public RemoteCacheManager infinispanCacheManager() {
     	
-		String value = "Connection to: " + host + " and port " + port + "with security (" + Boolean.valueOf(authentication) +  ").\n";
-//		if (Boolean.valueOf(authentication)) {
-			value = value.concat("Using security with " + username + "/" + password + ".\n");
-//		}
+		String value = "Connection to: " + host + " and port " + port + "with security (" + Boolean.valueOf(authentication) +  ").\n"
+				+ "Using security with " + username + "/" + password + ".\n";
 		
 		System.out.println(value);
 
@@ -49,13 +47,13 @@ public class Config {
                 .host(host)
                 .port(Integer.parseInt(port));
     // https://access.redhat.com/documentation/en-us/red_hat_data_grid/7.3/html-single/red_hat_data_grid_user_guide/#hotrod_java_client
-        if (Boolean.getBoolean(authentication)) {
+//        if (Boolean.getBoolean(authentication)) {
             builder.security()
             	.authentication()
 			        .username(username)
 			        .password(password)
 			        .realm("ApplicationRealm");
-        }
+//        }
 
         //builder.nearCache().mode(NearCacheMode.INVALIDATED).maxEntries(100);
 
