@@ -38,7 +38,7 @@ public class Config {
     public RemoteCacheManager infinispanCacheManager() {
     	
 		String value = "Connection to: " + host + " and port " + port + ".\n";
-		if (Boolean.getBoolean(authentication)) {
+		if (Boolean.parseBoolean(authentication)) {
 			value.concat("Using security with " + username + "/" + password + ".\n");
 		}
 		
