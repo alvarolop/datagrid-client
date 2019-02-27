@@ -9,7 +9,7 @@
 	</parent>
 
 	<groupId>me.ignaciosanchez</groupId>
-	<artifactId>hotrod-tester</artifactId>
+	<artifactId>hotrod-tester-72</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
 

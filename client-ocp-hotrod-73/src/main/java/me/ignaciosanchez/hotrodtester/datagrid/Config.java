@@ -2,7 +2,7 @@ package me.ignaciosanchez.hotrodtester.datagrid;
 
 import org.infinispan.client.hotrod.RemoteCacheManager;
 import org.infinispan.client.hotrod.configuration.ConfigurationBuilder;
-import org.infinispan.spring.provider.SpringRemoteCacheManager;
+import org.infinispan.spring.remote.provider.SpringRemoteCacheManager;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;

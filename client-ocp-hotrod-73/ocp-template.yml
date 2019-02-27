@@ -151,11 +151,11 @@ objects:
 parameters:
 - name: APPLICATION_NAME
   description: "The name for the application."
-  value: "hotrod-tester-72"
+  value: "hotrod-tester-73"
   required: true
 - name: APPLICATION_NAMESPACE
   description: "The namespace of the application."
-  value: "datagrid-itx-72"
+  value: "datagrid-itx-73"
   required: true
 - name: MOUNT_PATH
   description: "The namespace of the application."
@@ -167,5 +167,5 @@ parameters:
   required: true
 - name: GIT_CONTEXT_DIR
   description: "The namespace of the application."
-  value: "client-ocp-hotrod-72"
+  value: "client-ocp-hotrod-73"
   required: true

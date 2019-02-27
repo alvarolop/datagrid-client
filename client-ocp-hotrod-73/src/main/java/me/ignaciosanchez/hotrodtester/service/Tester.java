@@ -7,6 +7,7 @@ import org.infinispan.configuration.cache.CacheMode;
 import org.infinispan.configuration.cache.Configuration;
 import org.infinispan.configuration.cache.ConfigurationBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -16,11 +17,22 @@ import java.util.Arrays;
 import java.util.Random;
 
 @RestController
+@org.springframework.context.annotation.Configuration
 public class Tester {
 
     @Autowired
     RemoteCacheManager rcm;
+    
+    @Value("${datagrid.host}")
+    private String host;
 
+    @Value("${datagrid.port}")
+    private String port;
+    
+    @GetMapping("/api/info")
+    public String info() {   	
+            return  "Connection to: " + host + " and port " + port + ".\n" ;
+    }
 
     @GetMapping("/api/health")
     public String health() {
