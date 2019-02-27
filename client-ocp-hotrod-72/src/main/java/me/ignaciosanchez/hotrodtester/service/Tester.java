@@ -23,9 +23,6 @@ public class Tester {
     @Autowired
     RemoteCacheManager rcm;
     
-    @Value("${datagrid.test}")
-    private String test;
-    
     @Value("${datagrid.host}")
     private String host;
 
@@ -33,14 +30,9 @@ public class Tester {
     private String port;
     
     @GetMapping("/api/info")
-    public String info() {
-    	
-    	
-    	
-            return "This is the value of datagrid.test: " + test + ".\n" +
-            	   "Tried to connect to: " + host + " and port " + port + ".\n" ;
+    public String info() {   	
+            return  "Connection to: " + host + " and port " + port + ".\n" ;
     }
-
 
     @GetMapping("/api/health")
     public String health() {
