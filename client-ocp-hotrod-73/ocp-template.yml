@@ -155,7 +155,7 @@ parameters:
   required: true
 - name: APPLICATION_NAMESPACE
   description: "The namespace of the application."
-  value: "datagrid-itx-73"
+  value: "datagrid-73"
   required: true
 - name: MOUNT_PATH
   description: "The namespace of the application."
