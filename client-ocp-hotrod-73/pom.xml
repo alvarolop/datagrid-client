@@ -20,7 +20,7 @@
 		<commons-logging.version>1.2</commons-logging.version>
 		<junit.version>4.12</junit.version>
 		<openjdk18-openshift.version>1.3</openjdk18-openshift.version>
-		<spring-boot-bom.version>1.5.15.Final-redhat-00002</spring-boot-bom.version>
+<!-- 		<spring-boot-bom.version>1.5.15.Final-redhat-00002</spring-boot-bom.version> -->
 		<spring-boot.version>2.1.2.RELEASE</spring-boot.version>
 		<infinispan.version>9.4.6.Final-redhat-00002</infinispan.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -30,13 +30,13 @@
 
 	<dependencyManagement>
 		<dependencies>
-			<dependency>
-				<groupId>me.snowdrop</groupId>
-				<artifactId>spring-boot-bom</artifactId>
-				<version>${spring-boot-bom.version}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
+<!-- 			<dependency> -->
+<!-- 				<groupId>me.snowdrop</groupId> -->
+<!-- 				<artifactId>spring-boot-bom</artifactId> -->
+<!-- 				<version>${spring-boot-bom.version}</version> -->
+<!-- 				<type>pom</type> -->
+<!-- 				<scope>import</scope> -->
+<!-- 			</dependency> -->
 			<dependency>
 				<groupId>org.infinispan</groupId>
 				<artifactId>infinispan-bom</artifactId>
