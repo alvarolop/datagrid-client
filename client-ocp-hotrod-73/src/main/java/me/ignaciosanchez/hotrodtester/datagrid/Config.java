@@ -36,6 +36,13 @@ public class Config {
 
     @Bean
     public RemoteCacheManager infinispanCacheManager() {
+    	
+		String value = "Connection to: " + host + " and port " + port + ".\n";
+		if (Boolean.getBoolean(authentication)) {
+			value.concat("Using security with " + username + "/" + password + ".\n");
+		}
+		
+		System.out.println(value);
 
         ConfigurationBuilder builder = new ConfigurationBuilder();
         builder.addServer()
