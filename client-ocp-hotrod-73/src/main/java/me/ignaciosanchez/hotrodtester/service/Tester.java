@@ -40,8 +40,8 @@ public class Tester {
 
 	@GetMapping("/api/info")
 	public String info() {
-		String value = "Connection to: " + host + " and port " + port + ".\n";
-		if (Boolean.parseBoolean(authentication)) {
+		String value = "Connection to: " + host + " and port " + port + "with security (" + Boolean.valueOf(authentication) + ").\n";
+		if (Boolean.valueOf(authentication)) {
 			value.concat("Using security with " + username + "/" + password + ".\n");
 		}
 		return value;
