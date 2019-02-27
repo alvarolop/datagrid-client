@@ -26,9 +26,19 @@ public class Tester {
     @Value("${datagrid.test}")
     private String test;
     
+    @Value("${datagrid.host}")
+    private String host;
+
+    @Value("${datagrid.port}")
+    private String port;
+    
     @GetMapping("/api/info")
     public String info() {
-            return "This is the value of datagrid.test: " + test + "\n";
+    	
+    	
+    	
+            return "This is the value of datagrid.test: " + test + ".\n" +
+            	   "Tried to connect to: " + host + " and port " + port + ".\n" ;
     }
 
 
