@@ -9,7 +9,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import org.infinispan.client.hotrod.RemoteCache;
-import org.infinispan.spring.provider.SpringRemoteCacheManager;
+import org.infinispan.spring.remote.provider.SpringRemoteCacheManager;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.session.MapSession;
@@ -26,7 +26,7 @@ public class SessionsController {
 
 	@GetMapping("/sessions")
 	public Map<String, String> session(HttpServletRequest request) {
-		Map<String, String> result = new HashMap<>();
+		Map<String, String> result = new HashMap<String, String>();
 		String sessionId = request.getSession(true).getId();
 		result.put("created:", sessionId);
 		// By default Infinispan integration for Spring Session will use 'sessions' cache.

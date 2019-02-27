@@ -2,7 +2,8 @@ package com.example.springcache.config;
 
 import org.infinispan.client.hotrod.RemoteCacheManager;
 import org.infinispan.client.hotrod.configuration.ConfigurationBuilder;
-import org.infinispan.spring.provider.SpringRemoteCacheManager;
+import org.infinispan.spring.remote.provider.SpringRemoteCacheManager;
+//import org.infinispan.spring.provider.SpringRemoteCacheManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
