@@ -20,151 +20,145 @@ import java.util.Random;
 @org.springframework.context.annotation.Configuration
 public class Tester {
 
-    @Autowired
-    RemoteCacheManager rcm;
+	@Autowired
+	RemoteCacheManager rcm;
+
+	@Value("${datagrid.host}")
+	private String host;
+
+	@Value("${datagrid.port}")
+	private String port;
+	
+    @Value("${datagrid.authentication}")
+    private String authentication;
     
-    @Value("${datagrid.host}")
-    private String host;
+    @Value("${datagrid.username}")
+    private String username;
 
-    @Value("${datagrid.port}")
-    private String port;
-    
-    @GetMapping("/api/info")
-    public String info() {   	
-            return  "Connection to: " + host + " and port " + port + ".\n" ;
-    }
+    @Value("${datagrid.password}")
+    private String password;
 
-    @GetMapping("/api/health")
-    public String health() {
+	@GetMapping("/api/info")
+	public String info() {
+		String value = "Connection to: " + host + " and port " + port + ".\n";
+		if (Boolean.getBoolean(authentication)) {
+			value.concat("Using security with " + username + "/" + password + ".\n");
+		}
+		return value;
+	}
 
-        if (rcm.isStarted())
-            return "Cache Manager is started! " + rcm.getConfiguration().toString();
-        else
-            return "Cache Manager is not started";
-    }
+	@GetMapping("/api/health")
+	public String health() {
 
+		if (rcm.isStarted())
+			return "Cache Manager is started! " + rcm.getConfiguration().toString();
+		else
+			return "Cache Manager is not started";
+	}
 
-    @GetMapping("/api/reset")
-    public String reset() {
+	@GetMapping("/api/reset")
+	public String reset() {
 
-        rcm.stop();
-        rcm.start();
+		rcm.stop();
+		rcm.start();
 
-        return "Cache Manager restarted";
-    }
+		return "Cache Manager restarted";
+	}
 
+	@GetMapping("/api/cache")
+	public String caches() {
 
-    @GetMapping("/api/cache")
-    public String caches() {
+		return rcm.getCacheNames().toString();
+	}
 
-        return rcm.getCacheNames().toString();
-    }
+	@GetMapping("/api/cache/{cache}/stats")
+	public String stats(@PathVariable(value = "cache") String cacheName) {
 
+		return rcm.getCache(cacheName).stats().getStatsMap().toString();
+	}
 
-    @GetMapping("/api/cache/{cache}/stats")
-    public String stats(
-            @PathVariable(value = "cache") String cacheName) {
+	@GetMapping("/api/cache/{cache}/create")
+	public String create(@PathVariable(value = "cache") String cacheName) {
 
-        return rcm.getCache(cacheName).stats().getStatsMap().toString();
-    }
+		Configuration config = new ConfigurationBuilder().clustering().cacheMode(CacheMode.DIST_ASYNC).memory()
+				.size(20000).expiration().wakeUpInterval(5000L).maxIdle(120000L).build();
 
-    @GetMapping("/api/cache/{cache}/create")
-    public String create(
-            @PathVariable(value = "cache") String cacheName) {
+		// rcm.administration().getOrCreateCache(cacheName, config);
+		rcm.administration().getOrCreateCache(cacheName, new XMLStringConfiguration(config.toXMLString()));
 
-        Configuration config = new ConfigurationBuilder()
-                .clustering().cacheMode(CacheMode.DIST_ASYNC)
-                .memory()
-                    .size(20000)
-                .expiration()
-                    .wakeUpInterval(5000L)
-                    .maxIdle(120000L)
-                .build();
+		return rcm.getCache(cacheName).stats().getStatsMap().toString();
+	}
 
-        //rcm.administration().getOrCreateCache(cacheName, config);
-        rcm.administration().getOrCreateCache(cacheName, new XMLStringConfiguration(config.toXMLString()));
+	@GetMapping("/api/cache/{cache}/put")
+	public String put(@PathVariable(value = "cache") String cacheName, @RequestParam(value = "entries") int numEntries,
+			@RequestParam(value = "size", required = false) Integer entrySize,
+			@RequestParam(value = "minkey", required = false) Integer entryMinkey) {
 
-        return rcm.getCache(cacheName).stats().getStatsMap().toString();
-    }
+		RemoteCache<String, byte[]> cache = rcm.getCache(cacheName);
 
+		int min = 0;
+		if (entryMinkey != null)
+			min = entryMinkey;
 
-    @GetMapping("/api/cache/{cache}/put")
-    public String put(
-            @PathVariable(value = "cache") String cacheName,
-            @RequestParam(value = "entries") int numEntries,
-            @RequestParam(value = "size", required=false) Integer entrySize,
-            @RequestParam(value = "minkey", required=false) Integer entryMinkey) {
+		int size = 1024;
+		if (entrySize != null)
+			size = entrySize;
 
-        RemoteCache<String, byte[]> cache = rcm.getCache(cacheName);
+		byte[] bytes = new byte[size];
+		Random rnd = new Random();
 
-        int min = 0;
-        if (entryMinkey != null)
-            min = entryMinkey;
+		for (int i = min; i < (min + numEntries); i++) {
 
-        int size = 1024;
-        if (entrySize != null)
-            size = entrySize;
+			rnd.nextBytes(bytes);
 
-        byte[] bytes = new byte[size];
-        Random rnd = new Random();
+			cache.put(Integer.toString(i), bytes);
+		}
 
-        for (int i=min; i<(min + numEntries) ; i++) {
+		return "OK " + numEntries + " " + entrySize + " " + entryMinkey;
+	}
 
-            rnd.nextBytes(bytes);
+	@GetMapping("/api/cache/{cache}/get")
+	public String get(@PathVariable(value = "cache") String cacheName, @RequestParam(value = "entries") int numEntries,
+			@RequestParam(value = "minkey", required = false) Integer entryMinkey) {
 
-            cache.put(Integer.toString(i), bytes);
-        }
+		RemoteCache<String, byte[]> cache = rcm.getCache(cacheName);
 
-        return "OK " + numEntries + " " + entrySize + " " + entryMinkey;
-    }
+		int min = 0;
+		if (entryMinkey != null)
+			min = entryMinkey;
 
-    @GetMapping("/api/cache/{cache}/get")
-    public String get(
-            @PathVariable(value = "cache") String cacheName,
-            @RequestParam(value = "entries") int numEntries,
-            @RequestParam(value = "minkey", required=false) Integer entryMinkey) {
+		for (int i = min; i < (min + numEntries); i++) {
+			cache.get(Integer.toString(i));
+		}
 
-        RemoteCache<String, byte[]> cache = rcm.getCache(cacheName);
+		return "OK " + numEntries + " " + entryMinkey;
+	}
 
-        int min = 0;
-        if (entryMinkey != null)
-            min = entryMinkey;
+	@GetMapping("/api/cache/{cache}/get-single")
+	public String getSingle(@PathVariable(value = "cache") String cacheName, @RequestParam(value = "key") int key) {
 
-        for (int i=min; i<(min + numEntries) ; i++) {
-            cache.get(Integer.toString(i));
-        }
+		RemoteCache<String, byte[]> cache = rcm.getCache(cacheName);
 
-        return "OK " + numEntries + " " + entryMinkey;
-    }
+		return Arrays.toString(cache.get(Integer.toString(key)));
+	}
 
-    @GetMapping("/api/cache/{cache}/get-single")
-    public String getSingle(
-            @PathVariable(value = "cache") String cacheName,
-            @RequestParam(value = "key") int key) {
+	@GetMapping("/api/cache/{cache}/remove")
+	public String remove(@PathVariable(value = "cache") String cacheName,
+			@RequestParam(value = "entries") int numEntries,
+			@RequestParam(value = "minkey", required = false) Integer entryMinkey) {
 
-        RemoteCache<String, byte[]> cache = rcm.getCache(cacheName);
+		RemoteCache<String, byte[]> cache = rcm.getCache(cacheName);
 
-        return Arrays.toString(cache.get(Integer.toString(key)));
-    }
+		int min = 0;
+		if (entryMinkey != null)
+			min = entryMinkey;
 
-    @GetMapping("/api/cache/{cache}/remove")
-    public String remove(
-            @PathVariable(value = "cache") String cacheName,
-            @RequestParam(value = "entries") int numEntries,
-            @RequestParam(value = "minkey", required=false) Integer entryMinkey) {
+		for (int i = min; i < (min + numEntries); i++) {
+			cache.remove(Integer.toString(i));
+		}
 
-        RemoteCache<String, byte[]> cache = rcm.getCache(cacheName);
+		return "OK " + numEntries + " " + entryMinkey;
+	}
 
-        int min = 0;
-        if (entryMinkey != null)
-            min = entryMinkey;
-
-        for (int i=min; i<(min + numEntries) ; i++) {
-            cache.remove(Integer.toString(i));
-        }
-
-        return "OK " + numEntries + " " + entryMinkey;
-    }
-
-    // putcron, cron, n, minkey, maxkey
+	// putcron, cron, n, minkey, maxkey
 }

@@ -41,6 +41,7 @@ public class Config {
         builder.addServer()
                 .host(host)
                 .port(Integer.parseInt(port));
+    // https://access.redhat.com/documentation/en-us/red_hat_data_grid/7.3/html-single/red_hat_data_grid_user_guide/#hotrod_java_client
         if (Boolean.getBoolean(authentication)) {
             builder.security()
             	.authentication()
