@@ -22,6 +22,9 @@ public class Config {
     @Value("${datagrid.authentication}")
     private String authentication;
     
+    @Value("${datagrid.serverName}")
+    private String serverName;
+    
     @Value("${datagrid.username}")
     private String username;
 
@@ -37,8 +40,8 @@ public class Config {
     @Bean
     public RemoteCacheManager infinispanCacheManager() {
     	
-		String value = "Connection to: " + host + " and port " + port + "with security (" + authentication.contains("true") +  ").\n"
-				+ "Using security with " + username + "/" + password + ".\n";
+		String value = "Connection to: " + host + " and port " + port + " with security (" + authentication.contains("true") +  "): "
+				+ username + " / " + password + " / " + serverName + ".\n";
 		
 		System.out.println(value);
 
@@ -48,12 +51,20 @@ public class Config {
                 .port(Integer.parseInt(port));
     // https://access.redhat.com/documentation/en-us/red_hat_data_grid/7.3/html-single/red_hat_data_grid_user_guide/#hotrod_java_client
         if (authentication.contains("true")) {
-            builder.security()
-        	.authentication()
-        		.saslMechanism("DIGEST-MD5")
-		        .username(username)
-		        .password(password)
-		        .realm("ApplicationRealm");
+        	// Option 1
+//            builder.security()
+//        	.authentication()
+//        		.saslMechanism("DIGEST-MD5")
+//		        .username(username)
+//		        .password(password)
+//		        .realm("ApplicationRealm");
+            // Option 2
+			builder.security()
+			.authentication()
+				.enable()
+				.serverName(serverName)
+				.saslMechanism("DIGEST-MD5")
+				.callbackHandler(new CacheCallbackHandler(username, "ApplicationRealm", password.toCharArray()));
         }
         //builder.nearCache().mode(NearCacheMode.INVALIDATED).maxEntries(100);
 
