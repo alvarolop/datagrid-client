@@ -18,6 +18,16 @@ public class Config {
 
     @Value("${datagrid.port}")
     private String port;
+    
+    @Value("${datagrid.authentication}")
+    private String authentication;
+    
+    @Value("${datagrid.username}")
+    private String username;
+
+    @Value("${datagrid.password}")
+    private String password;
+    
 
     @Bean
     public SpringRemoteCacheManager cacheManager() {
@@ -31,6 +41,14 @@ public class Config {
         builder.addServer()
                 .host(host)
                 .port(Integer.parseInt(port));
+        if (Boolean.getBoolean(authentication)) {
+            builder.security()
+            	.authentication()
+			        .username(username)
+			        .password(password)
+			        .realm("ApplicationRealm");
+        }
+
         //builder.nearCache().mode(NearCacheMode.INVALIDATED).maxEntries(100);
 
         return new RemoteCacheManager(builder.build());
