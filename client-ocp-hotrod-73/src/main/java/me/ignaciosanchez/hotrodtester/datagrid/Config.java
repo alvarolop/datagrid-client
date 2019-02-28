@@ -59,12 +59,12 @@ public class Config {
 //		        .password(password)
 //		        .realm("ApplicationRealm");
             // Option 2
-			builder.security()
-			.authentication()
-				.enable()
-				.serverName(serverName)
-				.saslMechanism("DIGEST-MD5")
-				.callbackHandler(new CacheCallbackHandler(username, "ApplicationRealm", password.toCharArray()));
+//			builder.security()
+//			.authentication()
+//				.enable()
+//				.serverName(serverName)
+//				.saslMechanism("DIGEST-MD5")
+//				.callbackHandler(new CacheCallbackHandler(username, "ApplicationRealm", password.toCharArray()));
         }
         //builder.nearCache().mode(NearCacheMode.INVALIDATED).maxEntries(100);
 
