@@ -119,6 +119,7 @@ objects:
       contextDir: ${GIT_CONTEXT_DIR}
       git:
         uri: ${GIT_REPOSITORY}
+        ref: ${GIT_REF}
       type: Git
     strategy:
       sourceStrategy:
