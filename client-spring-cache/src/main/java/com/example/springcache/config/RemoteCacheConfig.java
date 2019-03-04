@@ -29,8 +29,8 @@ public class RemoteCacheConfig {
 	}
 
 	private RemoteCacheManager infinispanCacheManager() {
-		log.info("-------> This is the host: " + host);
-		log.info("-------> This is the port: " + port);
+		log.info("-------> Data Grid host: " + host);
+		log.info("-------> Data Grid port: " + port);
 		org.infinispan.client.hotrod.configuration.Configuration config = new ConfigurationBuilder()
 				.addServer()
 					.host(host)

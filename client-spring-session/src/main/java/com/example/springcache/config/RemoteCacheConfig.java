@@ -5,17 +5,11 @@ import org.infinispan.client.hotrod.configuration.ConfigurationBuilder;
 import org.infinispan.spring.remote.provider.SpringRemoteCacheManager;
 import org.infinispan.spring.remote.provider.SpringRemoteCacheManagerFactoryBean;
 import org.infinispan.spring.remote.session.configuration.EnableInfinispanRemoteHttpSession;
-//import org.infinispan.spring.session.configuration.EnableInfinispanRemoteHttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Primary;
-import org.springframework.session.web.http.HeaderHttpSessionStrategy;
-import org.springframework.session.web.http.HttpSessionStrategy;
 
-@EnableCaching
 @EnableInfinispanRemoteHttpSession
 public class RemoteCacheConfig {
 	
@@ -28,14 +22,13 @@ public class RemoteCacheConfig {
 	Logger log = LoggerFactory.getLogger(this.getClass());
 	
 	@Bean
-	@Primary
 	public SpringRemoteCacheManager cacheManager() {
 		return new SpringRemoteCacheManager(infinispanCacheManager());
 	}
 
 	private RemoteCacheManager infinispanCacheManager() {
-		log.info("-------> This is the host: " + host);
-		log.info("-------> This is the port: " + port);
+		log.info("-------> Data grid host: " + host);
+		log.info("-------> Data Grid port: " + port);
 		org.infinispan.client.hotrod.configuration.Configuration config = new ConfigurationBuilder()
 				.addServer()
 					.host(host)
@@ -43,16 +36,10 @@ public class RemoteCacheConfig {
 				.build();
 		return new RemoteCacheManager(config);
 	}
+	
 	@Bean
 	public SpringRemoteCacheManagerFactoryBean springCacheManager() {
 		return new SpringRemoteCacheManagerFactoryBean();
 	}
 	
-	// An optional configuration bean that replaces the default cookie for obtaining configuration.
-	// For more information refer to Spring Session documentation.
-	// Alvaro: This Bean gives one different session each time the tab is refreshed.  
-//	@Bean
-//	public HttpSessionStrategy httpSessionStrategy() {
-//		return new HeaderHttpSessionStrategy();
-//	}
 }
