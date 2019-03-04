@@ -1,0 +1,162 @@
+apiVersion: v1
+kind: Template
+metadata:
+  name: ${APPLICATION_NAME}
+  annotations:
+    description: Template for the application
+    tags: app,java,springboot
+    iconClass: icon-rh-openjdk
+    openshift.io/provider-display-name: Red Hat, Inc.
+    openshift.io/support-url: https://access.redhat.com
+labels:
+  template: ${APPLICATION_NAME}
+  app: ${APPLICATION_NAME}
+objects:
+- apiVersion: image.openshift.io/v1
+  kind: ImageStream
+  metadata:
+    labels:
+      app: ${APPLICATION_NAME}
+    name: ${APPLICATION_NAME}
+    namespace: ${APPLICATION_NAMESPACE}
+  spec:
+    lookupPolicy:
+      local: false
+- apiVersion: v1
+  kind: Service
+  metadata:
+    labels:
+      app: ${APPLICATION_NAME}
+    name: ${APPLICATION_NAME}
+    namespace: ${APPLICATION_NAMESPACE}
+  spec:
+    ports:
+    - name: 8080-tcp
+      port: 8080
+      protocol: TCP
+      targetPort: 8080
+    - name: 8443-tcp
+      port: 8443
+      protocol: TCP
+      targetPort: 8443
+    - name: 8778-tcp
+      port: 8778
+      protocol: TCP
+      targetPort: 8778
+    selector:
+      deploymentconfig: ${APPLICATION_NAME}
+- apiVersion: apps.openshift.io/v1
+  kind: DeploymentConfig
+  metadata:
+    labels:
+      app: ${APPLICATION_NAME}
+    name: ${APPLICATION_NAME}
+    namespace: ${APPLICATION_NAMESPACE}
+  spec:
+    replicas: 1
+    revisionHistoryLimit: 10
+    selector:
+      app: ${APPLICATION_NAME}
+      deploymentconfig: ${APPLICATION_NAME}
+    strategy:
+      activeDeadlineSeconds: 21600
+      resources: {}
+      rollingParams:
+        intervalSeconds: 1
+        maxSurge: 25%
+        maxUnavailable: 25%
+        timeoutSeconds: 600
+        updatePeriodSeconds: 1
+      type: Rolling
+    triggers:
+    - type: ConfigChange
+    - type: ImageChange
+      imageChangeParams:
+        automatic: true
+        containerNames:
+        - ${APPLICATION_NAME}
+        from:
+          kind: ImageStreamTag
+          name: ${APPLICATION_NAME}:latest
+    template:
+      metadata:
+        name: ${APPLICATION_NAME}
+        labels:
+          app: ${APPLICATION_NAME}
+          deploymentconfig: ${APPLICATION_NAME}
+      spec:
+        containers:
+        - name: ${APPLICATION_NAME}
+          image: 172.30.1.1:5000/${APPLICATION_NAMESPACE}/${APPLICATION_NAME}
+          imagePullPolicy: Always
+          ports:
+          - containerPort: 8080
+            protocol: TCP
+          - containerPort: 8443
+            protocol: TCP
+          - containerPort: 8778
+            protocol: TCP
+          resources: {}
+    test: false
+- apiVersion: build.openshift.io/v1
+  kind: BuildConfig
+  metadata:
+    labels:
+      app: ${APPLICATION_NAME}
+    name: ${APPLICATION_NAME}
+    namespace: ${APPLICATION_NAMESPACE}
+  spec:
+    failedBuildsHistoryLimit: 5
+    nodeSelector: null
+    output:
+      to:
+        kind: ImageStreamTag
+        name: ${APPLICATION_NAME}:latest
+    postCommit: {}
+    resources: {}
+    runPolicy: Serial
+    source:
+      contextDir: ${GIT_CONTEXT_DIR}
+      git:
+        uri: ${GIT_REPOSITORY}
+      type: Git
+    strategy:
+      sourceStrategy:
+        from:
+          kind: ImageStreamTag
+          name: redhat-openjdk18-openshift:1.4
+          namespace: openshift
+      type: Source
+    successfulBuildsHistoryLimit: 5
+    triggers:
+    - github:
+        secret: mj-env-ZS1u4-1xcEpRi
+      type: GitHub
+    - generic:
+        secret: Y4t9MSNFeWuE6lgvBByV
+      type: Generic
+    - type: ConfigChange
+    - imageChange:
+        lastTriggeredImageID: 172.30.1.1:5000/openshift/redhat-openjdk18-openshift
+      type: ImageChange
+  status:
+    lastVersion: 1
+parameters:
+- name: APPLICATION_NAME
+  description: "The name for the application."
+  required: true
+- name: APPLICATION_NAMESPACE
+  description: "The namespace of the application."
+  required: true
+- name: GIT_REPOSITORY
+  description: "The namespace of the application."
+  value: "https://github.com/alvarolop/datagrid-client.git"
+  required: true
+- name: GIT_REF
+  description: "The branch of the git repository."
+  value: "rhdg-7-2"
+  required: true
+- name: GIT_CONTEXT_DIR
+  description: "The namespace of the application."
+  value: "client-spring-session"
+  required: true
