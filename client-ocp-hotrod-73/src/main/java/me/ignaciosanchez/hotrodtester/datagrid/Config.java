@@ -54,22 +54,3 @@ public class Config {
         return new RemoteCacheManager(builder.build());
     }
 }
-
-
-// https://access.redhat.com/documentation/en-us/red_hat_data_grid/7.3/html-single/red_hat_data_grid_user_guide/#hotrod_java_client
-//if (authentication.contains("true")) {
-	// Option 1
-//  builder.security()
-//	.authentication()
-//		.saslMechanism("DIGEST-MD5")
-//      .username(username)
-//      .password(password)
-//      .realm("ApplicationRealm");
-  // Option 2
-//	builder.security()
-//	.authentication()
-//		.enable()
-//		.serverName(serverName)
-//		.saslMechanism("DIGEST-MD5")
-//		.callbackHandler(new CacheCallbackHandler(username, "ApplicationRealm", password.toCharArray()));
-//}
