@@ -14,7 +14,7 @@
     <properties>
         <spring-boot.version>2.1.2.RELEASE</spring-boot.version>
         <version.org.springframework.session>1.3.5.RELEASE</version.org.springframework.session>
-        <version.infinispan.starter>2.1.3.Final-redhat-00002</version.infinispan.starter>
+        <version.infinispan.starter>2.1.3.Final-redhat-00001</version.infinispan.starter>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>1.8</java.version>
@@ -35,8 +35,9 @@
 
         <dependency>
             <groupId>org.springframework.session</groupId>
-            <artifactId>spring-session</artifactId>
-            <version>${version.org.springframework.session}</version>
+            <artifactId>spring-session-core</artifactId>
+            <version>${spring-boot.version}</version>
+<!--             <version>${version.org.springframework.session}</version> -->
         </dependency>
 
         <dependency>
