@@ -151,11 +151,9 @@ objects:
 parameters:
 - name: APPLICATION_NAME
   description: "The name for the application."
-  value: "hotrod-tester-72"
   required: true
 - name: APPLICATION_NAMESPACE
   description: "The namespace of the application."
-  value: "datagrid-itx-72"
   required: true
 - name: MOUNT_PATH
   description: "The namespace of the application."
