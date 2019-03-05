@@ -1,5 +1,6 @@
 package com.example.springcache.config;
 
+import org.infinispan.client.hotrod.ProtocolVersion;
 import org.infinispan.client.hotrod.RemoteCacheManager;
 import org.infinispan.client.hotrod.configuration.ConfigurationBuilder;
 import org.infinispan.spring.remote.provider.SpringRemoteCacheManager;
@@ -20,6 +21,9 @@ public class RemoteCacheConfig {
 
 	@Value("${datagrid.port}")
 	private int port;
+	
+	@Value("${datagrid.compatibility}")
+	private String compatibility_mode;
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
 	
@@ -31,12 +35,16 @@ public class RemoteCacheConfig {
 	private RemoteCacheManager infinispanCacheManager() {
 		log.info("-------> Data Grid host: " + host);
 		log.info("-------> Data Grid port: " + port);
-		org.infinispan.client.hotrod.configuration.Configuration config = new ConfigurationBuilder()
-				.addServer()
-					.host(host)
-					.port(port)
-				.build();
-		return new RemoteCacheManager(config);
+		ConfigurationBuilder config = new ConfigurationBuilder();
+		config.addServer()
+				.host(host)
+				.port(port);
+		
+		if (compatibility_mode.equals("true")) {
+			log.info("-------> Data Grid compatibility mode: " + ProtocolVersion.PROTOCOL_VERSION_25.name());
+			config.version(ProtocolVersion.PROTOCOL_VERSION_25);
+		}
+		return new RemoteCacheManager(config.build());
 	}
 	
 }
