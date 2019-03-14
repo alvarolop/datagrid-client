@@ -74,6 +74,18 @@ public class Tester {
 
 		return rcm.getCache(cacheName).stats().getStatsMap().toString();
 	}
+	
+	@GetMapping("/api/cache/{cache}/stats-client")
+	public String clientStats(@PathVariable(value = "cache") String cacheName) {
+
+		return rcm.getCache(cacheName).clientStatistics().toString();
+	}
+	
+	@GetMapping("/api/cache/{cache}/stats-server")
+	public String serverStats(@PathVariable(value = "cache") String cacheName) {
+
+		return rcm.getCache(cacheName).serverStatistics().getStatsMap().toString();
+	}
 
 	@GetMapping("/api/cache/{cache}/create")
 	public String create(@PathVariable(value = "cache") String cacheName) {
