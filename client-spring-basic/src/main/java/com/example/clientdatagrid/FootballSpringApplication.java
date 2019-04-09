@@ -20,7 +20,7 @@ public class FootballSpringApplication implements CommandLineRunner {
 	
 	@Value("${datagrid.host}")
 	private String host;
-
+	
 	@Value("${datagrid.port}")
 	private int port;
 	
@@ -33,30 +33,30 @@ public class FootballSpringApplication implements CommandLineRunner {
 		SpringApplication.run(FootballSpringApplication.class, args);
 	}
 	
-    @Override
-    public void run(String... args) { 
-        Configuration configuration = new ConfigurationBuilder()
-        		.addServer()
-        			.host(host)
-        			.port(port)
-        		.build();
-        
+	@Override
+	public void run(String... args) { 
+	    Configuration configuration = new ConfigurationBuilder()
+	    		.addServer()
+	    			.host(host)
+	    			.port(port)
+	    		.build();
+	    
 		log.info("-------> Data Grid host: " + host);
 		log.info("-------> Data Grid port: " + port);
 		
-        DataFormat jsonString = DataFormat.builder()
-        			.valueType(MediaType.APPLICATION_JSON)
+	    DataFormat jsonString = DataFormat.builder()
+	    			.valueType(MediaType.APPLICATION_JSON)
 	        		.valueMarshaller(new UTF8StringMarshaller()) // Serializes and deserializes strings and primitives as UTF8 byte arrays.
-        		.build();
-        
-        log.info("-------> Converting to RemoteCache<String, String>");
+	    		.build();
+	    
+	    log.info("-------> Converting to RemoteCache<String, String>");
 		cacheManager = new RemoteCacheManager(configuration);
-        cache = cacheManager.getCache("default").withDataFormat(jsonString);
-
+	    cache = cacheManager.getCache("default").withDataFormat(jsonString);
+	
 		
-        Team team = new Team("Barcelona", "This is the initial team", new String[]{"Messi", "Pedro", "Puyol"});
-        cache.put(team.getName(), team.toJsonString());
+	    Team team = new Team("Barcelona", "This is the initial team", new String[]{"Messi", "Pedro", "Puyol"});
+	    cache.put(team.getName(), team.toJsonString());
 		log.info("-------> Loaded: " + team.toJsonString());
-    }
+	}
 }
 

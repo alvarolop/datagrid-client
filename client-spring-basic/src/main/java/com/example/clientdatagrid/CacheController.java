@@ -28,40 +28,40 @@ public class CacheController {
 	
 	Logger log = LoggerFactory.getLogger(this.getClass());
 	
-    @PostMapping(path = "/team/{teamName}", consumes = "application/json")
-    public void addTeam (@PathVariable String teamName, @RequestBody String team) {
-        FootballSpringApplication.cache.put(teamName, team);
-    }
-
-    @PostMapping(path = "/team/{teamName}/player/{playerName}", consumes = "application/json") //TODO
-    public void addPlayers(@PathVariable String teamName, @PathVariable String playerName) {      
+	@PostMapping(path = "/team/{teamName}", consumes = "application/json")
+	public void addTeam (@PathVariable String teamName, @RequestBody String team) {
+	    FootballSpringApplication.cache.put(teamName, team);
+	}
+	
+	@PostMapping(path = "/team/{teamName}/player/{playerName}", consumes = "application/json") //TODO
+	public void addPlayers(@PathVariable String teamName, @PathVariable String playerName) {      
 		FootballSpringApplication.cache.get(teamName);
 		log.error("This method is not implemented yet");
-    }
-    
-    @GetMapping(path = "/team")
-    public String printTeams() {
-        return FootballSpringApplication.cache.values().toString();
-    }
-    
-    @GetMapping(path = "/team/{teamName}")
-    public String getTeam(@PathVariable String teamName) {
-        return FootballSpringApplication.cache.get(teamName);
-    }
-    
+	}
+	
+	@GetMapping(path = "/team")
+	public String printTeams() {
+	    return FootballSpringApplication.cache.values().toString();
+	}
+	
+	@GetMapping(path = "/team/{teamName}")
+	public String getTeam(@PathVariable String teamName) {
+	    return FootballSpringApplication.cache.get(teamName);
+	}
+	
 	@DeleteMapping(path = "/team/{teamName}")
 	public void removeTeam(@PathVariable String teamName) {	
 		FootballSpringApplication.cache.remove(teamName);
 	}
-
+	
 	@DeleteMapping(path = "/team/{teamName}/player/{playerName}") //TODO
 	public void removePlayer(@PathVariable String teamName, @PathVariable String playerName) {
 		FootballSpringApplication.cache.get(teamName);
 		log.error("This method is not implemented yet");
 	}
-    
-    @GetMapping(path = "/team/stop")
-    public void stop() {
-    	FootballSpringApplication.cacheManager.stop();
-    }
+	
+	@GetMapping(path = "/team/stop")
+	public void stop() {
+		FootballSpringApplication.cacheManager.stop();
+	}
 }
