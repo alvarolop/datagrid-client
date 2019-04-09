@@ -2,6 +2,7 @@ package com.example.clientdatagrid;
 
 import java.io.Console;
 
+import org.infinispan.client.hotrod.DataFormat;
 import org.infinispan.client.hotrod.RemoteCache;
 import org.infinispan.client.hotrod.RemoteCacheManager;
 
@@ -11,6 +12,8 @@ import java.util.List;
 
 import org.infinispan.client.hotrod.configuration.Configuration;
 import org.infinispan.client.hotrod.configuration.ConfigurationBuilder;
+import org.infinispan.commons.dataconversion.MediaType;
+import org.infinispan.commons.marshall.UTF8StringMarshaller;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.PropertySource;
@@ -48,7 +51,17 @@ public class FootballManager {
         		.build();
         cacheManager = new RemoteCacheManager(configuration);
         cache = cacheManager.getCache("teams");
-       
+
+        
+        // UTF8StringMarshaller: Serializes and deserializes strings and primitives as UTF8 byte arrays.
+        DataFormat jsonString = DataFormat
+        		.builder()
+	        		.valueType(MediaType.APPLICATION_JSON)
+	        		.valueMarshaller(new UTF8StringMarshaller())
+        		.build();
+        RemoteCache<String, String> stringsCache = cache.withDataFormat(jsonString);
+        
+
         
         if(!cache.containsKey(teamsKey)) {
             List<String> teams = new ArrayList<String>();
@@ -56,6 +69,7 @@ public class FootballManager {
             t.addPlayer("Messi");
             t.addPlayer("Pedro");
             t.addPlayer("Puyol");
+//            stringsCache.put(t.getName(), t.toString());
             cache.put(t.getName(), t);
             teams.add(t.getName());
             cache.put(teamsKey, teams);

@@ -16,7 +16,7 @@
 
 	<properties>
 		<java.version>1.8</java.version>
-		<version.org.infinispan>8.5.0.Final-redhat-9</version.org.infinispan>
+		<version.org.infinispan>9.4.6.Final-redhat-00002</version.org.infinispan>
 		<main.class.hotrod-endpoint>org.jboss.as.quickstarts.datagrid.hotrod.FootballManager</main.class.hotrod-endpoint>
 		
 		<!-- other plugin versions -->
