@@ -18,6 +18,8 @@ package com.example.clientdatagrid;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -28,11 +30,18 @@ public class Team implements Serializable {
     private static final long serialVersionUID = -181403229462007401L;
 
     private String teamName;
+    private String description;
     private List<String> players;
 
     public Team(String teamName) {
         this.teamName = teamName;
         players = new ArrayList<String>();
+    }
+    
+    public Team(String teamName, String description, String[] players) {
+        this.teamName = teamName;
+        this.description = description;
+        this.players = Arrays.asList(players);
     }
     
     public String getName() {
@@ -42,6 +51,10 @@ public class Team implements Serializable {
     public List<String> getPlayers() {
         return players;
     }
+    
+    public String getDescription() {
+        return description;
+    }
 
     public void addPlayer(String name) {
         players.add(name);
@@ -49,6 +62,25 @@ public class Team implements Serializable {
 
     public void removePlayer(String name) {
         players.remove(name);
+    }
+    
+    public String toJsonString() {
+    	StringBuilder b = new StringBuilder("{");
+
+        b.append("\"name\":\"" + teamName + "\",");
+        b.append("\"description\":\"" + description + "\",");
+        b.append("\"players\":[");
+        Iterator<String> iterator = players.iterator();
+        while(iterator.hasNext()){
+        	b.append("\"" + iterator.next() + "\"");
+        	if (iterator.hasNext())
+        		b.append(",");
+        	else
+        		b.append("]");
+        }
+        b.append("}"); // Close team
+        return b.toString();
+
     }
 
     @Override
