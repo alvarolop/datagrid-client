@@ -1,12 +1,19 @@
 package com.example.clientdatagrid;
 
+import java.util.List;
+
 import org.infinispan.client.hotrod.DataFormat;
 import org.infinispan.client.hotrod.RemoteCache;
 import org.infinispan.client.hotrod.RemoteCacheManager;
+import org.infinispan.client.hotrod.Search;
 import org.infinispan.client.hotrod.configuration.Configuration;
 import org.infinispan.client.hotrod.configuration.ConfigurationBuilder;
+import org.infinispan.client.hotrod.marshall.ProtoStreamMarshaller;
 import org.infinispan.commons.dataconversion.MediaType;
 import org.infinispan.commons.marshall.UTF8StringMarshaller;
+import org.infinispan.configuration.global.GlobalConfigurationBuilder;
+import org.infinispan.query.dsl.Query;
+import org.infinispan.query.dsl.QueryFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -39,7 +46,11 @@ public class FootballSpringApplication implements CommandLineRunner {
 	    		.addServer()
 	    			.host(host)
 	    			.port(port)
+		    	.marshaller(new UTF8StringMarshaller())
 	    		.build();
+	    
+//	    GlobalConfigurationBuilder builder = new GlobalConfigurationBuilder()
+//	    		builder.serialization().marshaller(myMarshaller); // needs an instance of the marshaller
 	    
 		log.info("-------> Data Grid host: " + host);
 		log.info("-------> Data Grid port: " + port);
@@ -54,9 +65,27 @@ public class FootballSpringApplication implements CommandLineRunner {
 	    cache = cacheManager.getCache("default").withDataFormat(jsonString);
 	
 		
-	    Team team = new Team("Barcelona", "This is the initial team", new String[]{"Messi", "Pedro", "Puyol"});
-	    cache.put(team.getName(), team.toJsonString());
-		log.info("-------> Loaded: " + team.toJsonString());
+	    Team team1 = new Team("Barcelona", "This is the initial team", new String[]{"Messi", "Pedro", "Puyol"});
+	    Team team2 = new Team("Madrid", "This is the second team", new String[]{"Benzema", "Ramos", "Bale"});
+	    Team team3 = new Team("Atleti", "This is the third team", new String[]{"Griezmann", "Morata", "Costa"});
+
+	    cache.put(team1.getName(), team1.toJsonString());
+	    cache.put(team2.getName(), team2.toJsonString());
+	    cache.put(team3.getName(), team3.toJsonString());
+
+		log.info("-------> Loaded: " + team1.toJsonString());
+		log.info("-------> Loaded: " + team2.toJsonString());
+		log.info("-------> Loaded: " + team3.toJsonString());
+		
+		log.info("-------> Barcelona is: " + cache.get("Barcelona"));
+		
+		// RemoteCache<String, String> cache2 = cacheManager.getCache("default");
+		QueryFactory queryFactory = Search.getQueryFactory(cache);
+		Query query1 = queryFactory.from(String.class).having("name").eq("Barcelona").build();
+		
+		Query query2 = queryFactory.create("from sample_bank_account.Transaction where name ");
+
+		List<String> list = query1.list();
 	}
 }
 
