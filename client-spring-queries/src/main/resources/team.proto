@@ -1,0 +1,12 @@
+/**
+  * @Indexed(true)
+  */
+message Team {
+
+   /* @Field(index=Index.YES, analyze = Analyze.YES, store = Store.NO) */ 
+   required string name = 1;
+   
+   /* @Field(index=Index.YES, analyze = Analyze.YES, store = Store.NO) */ 
+   required string description = 2;
+   repeated string players = 3;
+}
