@@ -5,8 +5,8 @@ message Team {
 
    /* @Field(index=Index.YES, analyze = Analyze.YES, store = Store.NO) */ 
    required string name = 1;
-   
-   /* @Field(index=Index.YES, analyze = Analyze.YES, store = Store.NO) */ 
+   /* @Field(index=Index.NO, analyze = Analyze.NO, store = Store.NO) */ 
    required string description = 2;
+   /* @Field(index=Index.NO, analyze = Analyze.NO, store = Store.NO) */ 
    repeated string players = 3;
 }

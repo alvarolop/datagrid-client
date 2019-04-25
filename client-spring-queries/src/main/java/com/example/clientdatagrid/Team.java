@@ -29,12 +29,19 @@ public class Team implements Serializable {
 
     private static final long serialVersionUID = -181403229462007401L;
 
+    private final String _type = "Team";
     private String teamName;
     private String description;
     private List<String> players;
 
     public Team(String teamName) {
         this.teamName = teamName;
+        players = new ArrayList<String>();
+    }
+    
+    public Team(String teamName, String description) {
+        this.teamName = teamName;
+        this.description = description;
         players = new ArrayList<String>();
     }
     
@@ -46,6 +53,10 @@ public class Team implements Serializable {
     
     public String getName() {
         return teamName;
+    }
+    
+    public String get_type() {
+        return _type;
     }
 
     public List<String> getPlayers() {

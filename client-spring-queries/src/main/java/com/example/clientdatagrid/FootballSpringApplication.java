@@ -11,6 +11,7 @@ import org.infinispan.client.hotrod.configuration.Configuration;
 import org.infinispan.client.hotrod.configuration.ConfigurationBuilder;
 import org.infinispan.client.hotrod.marshall.ProtoStreamMarshaller;
 import org.infinispan.commons.dataconversion.MediaType;
+import org.infinispan.commons.marshall.Marshaller;
 import org.infinispan.commons.marshall.UTF8StringMarshaller;
 import org.infinispan.query.dsl.Query;
 import org.infinispan.query.dsl.QueryFactory;
@@ -22,6 +23,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.infinispan.protostream.DescriptorParserException;
 import org.infinispan.protostream.FileDescriptorSource;
 import org.infinispan.protostream.SerializationContext;
@@ -64,27 +70,58 @@ public class FootballSpringApplication implements CommandLineRunner {
 	    
 	    Team team1 = new Team("Barcelona", "This is the initial team", new String[]{"Messi", "Pedro", "Puyol"});
 	    Team team2 = new Team("Madrid", "This is the second team", new String[]{"Benzema", "Ramos", "Bale"});
-	    Team team3 = new Team("Atleti", "This is the third team", new String[]{"Griezmann", "Morata", "Costa"});
 	    
 		cacheManager = new RemoteCacheManager(configuration);
+		
+		RemoteCache<String, String> cacheDefault = cacheManager.getCache("default");
+		
 	    cache = cacheManager.getCache("default").withDataFormat(jsonString);
 	    
 		RegisterProtobuf(cacheManager);
 
 	    cache.put(team1.getName(), team1.toJsonString());
+	    
 	    cache.put(team2.getName(), team2.toJsonString());
-	    cache.put(team3.getName(), team3.toJsonString());
+//	    cache.put(team3.getName(), team3.toJsonString());
 
 		log.info("-------> Loaded: " + cache.keySet().toString());
 			
 		QueryFactory queryFactory = Search.getQueryFactory(cache);
-//		Query query1 = queryFactory.from(String.class).having("name").eq("Barcelona").build();
-		
-		Query query1 = queryFactory.create("from Team");
+
+		Query query1 = queryFactory.from("Team").having("name").eq("Barcelona").build();
 		Query query2 = queryFactory.create("from Team where name : 'Barcelona'");	
+
+//		Query query1 = queryFactory.create("from Team where description : 'This is the initial team'");
+//		Query query2 = queryFactory.create("from Team where name : 'Barcelona'");	
 		
-		log.info("-------> This is the result of the query1: " + query1.list().toString());
-		log.info("-------> This is the result of the query2: " + query2.list().toString());
+		log.info("-------> Query1: " + query1.list().toString());
+		log.info("-------> Query2: " + query2.list().toString());
+		
+//		cache.entrySet().stream().
+		
+		ObjectMapper objectMapper = new ObjectMapper();
+	    Team team3 = new Team("Atleti", "This is the third team", new String[]{"Griezmann", "Morata", "Costa"});
+	    String teamAsString = "";
+		try {
+			teamAsString = objectMapper.writeValueAsString(team3);
+		} catch (JsonProcessingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		log.info("-------> Team3: " + teamAsString);
+
+		
+		// Alternativelly, it's possible to request JSON values but marshalled/unmarshalled with a custom value marshaller that returns `org.codehaus.jackson.JsonNode` objects:
+//		DataFormat jsonNode = DataFormat.builder()
+//				.valueType(MediaType.APPLICATION_JSON)
+//				.valueMarshaller((Marshaller) new CustomJacksonMarshaller())
+//			.build();
+
+//		RemoteCache<String, JsonNode> jsonNodeCache = cache.withDataFormat(jsonNode);
+
+	    
+
 
 	}
 	
