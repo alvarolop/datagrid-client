@@ -24,17 +24,10 @@ import java.util.List;
 
 import org.infinispan.protostream.annotations.ProtoDoc;
 import org.infinispan.protostream.annotations.ProtoField;
-import org.infinispan.protostream.annotations.ProtoMessage;
 
-/**
- * @author Martin Gencur
- */
 @ProtoDoc("@Indexed")
-public class Team implements Serializable {
+public class Team {
 
-    private static final long serialVersionUID = -181403229462007401L;
-
-//    private final String _type = "Team";
     private String teamName;
     private String description;
     private List<String> players;
@@ -58,7 +51,6 @@ public class Team implements Serializable {
         this.description = description;
         this.players = Arrays.asList(players);
     }
-    
     
     @ProtoDoc("@Field(index=Index.YES, store = Store.YES, analyze = Analyze.NO)")
     @ProtoField(number = 1, required = true)

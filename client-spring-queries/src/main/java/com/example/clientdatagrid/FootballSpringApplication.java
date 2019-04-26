@@ -1,7 +1,6 @@
 package com.example.clientdatagrid;
 
 import java.io.IOException;
-import java.util.Scanner;
 
 import org.infinispan.client.hotrod.DataFormat;
 import org.infinispan.client.hotrod.RemoteCache;
@@ -16,7 +15,6 @@ import org.infinispan.commons.marshall.UTF8StringMarshaller;
 import org.infinispan.query.dsl.Query;
 import org.infinispan.query.dsl.QueryFactory;
 import org.infinispan.query.remote.client.ProtobufMetadataManagerConstants;
-import org.jgroups.tests.perf.UPerf.Config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,8 +26,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import org.infinispan.protostream.DescriptorParserException;
-import org.infinispan.protostream.FileDescriptorSource;
 import org.infinispan.protostream.SerializationContext;
 import org.infinispan.protostream.annotations.ProtoSchemaBuilder;
 import org.infinispan.protostream.annotations.ProtoSchemaBuilderException;
@@ -43,6 +39,9 @@ public class FootballSpringApplication implements CommandLineRunner {
 	
 	@Value("${datagrid.port}")
 	private int port;
+	
+	@Value("${datagrid.cache}")
+	private String cacheName;
 	
 	public static RemoteCacheManager cacheManager;
 	public static RemoteCache<String, String> cacheString;
@@ -79,11 +78,12 @@ public class FootballSpringApplication implements CommandLineRunner {
 //			.build();
 		
 		cacheManager = new RemoteCacheManager(configuration);
-		cachePojo = cacheManager.getCache("default");
-	    cacheString = cacheManager.getCache("default").withDataFormat(jsonString);
+		cachePojo = cacheManager.getCache(cacheName);
+	    cacheString = cacheManager.getCache(cacheName).withDataFormat(jsonString);
 //	    cacheJsonNode = cacheManager.getCache("default").withDataFormat(jsonNode);
 
-	    registerSchemasAndMarshallers(cacheManager);
+	    registerSchemas(cacheManager);
+	    
 	    
 	    
 	    // Load information to the cache in several formats (POJO, JSON string)
@@ -99,6 +99,8 @@ public class FootballSpringApplication implements CommandLineRunner {
 		log.info("-------> Teams loaded (String): " + cacheString.keySet().toString());
 
 		
+		
+		
 		// Queries to the RemoteCache <String, Team>
 		QueryFactory queryFactoryPojo = Search.getQueryFactory(cachePojo);
 
@@ -110,6 +112,9 @@ public class FootballSpringApplication implements CommandLineRunner {
 		log.info("-------> Query 1: " + query1.list().toString());
 		log.info("-------> Query 2: " + query2.list().toString());
 		log.info("-------> Query 3: " + query3.list().toString());
+		
+		
+		
 		
 		// Queries to the RemoteCache <String, Team>
 		QueryFactory queryFactoryString = Search.getQueryFactory(cacheString);
@@ -150,23 +155,10 @@ public class FootballSpringApplication implements CommandLineRunner {
 
 	}
 	
-	private void registerSchemasAndMarshallers(RemoteCacheManager cacheManager) {
+	private void registerSchemas(RemoteCacheManager cacheManager) {
 		
 		SerializationContext serCtx = ProtoStreamMarshaller.getSerializationContext(cacheManager);
-/*
-		// Option 1: Define your own proto schema and register it
-	    FileDescriptorSource fds = new FileDescriptorSource();
-	    try {
-			fds.addProtoFiles("/team.proto");
-			serCtx.registerProtoFiles(fds);
-		} catch (DescriptorParserException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-*/
+		
 		// Register Team schema in the client
 		ProtoSchemaBuilder protoSchemaBuilder = new ProtoSchemaBuilder();
 		String memoSchemaFile = "";
