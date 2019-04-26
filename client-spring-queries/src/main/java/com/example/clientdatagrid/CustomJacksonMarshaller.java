@@ -13,7 +13,7 @@ public class CustomJacksonMarshaller implements Externalizer<Team> {
     @Override
     public void writeObject(ObjectOutput output, Team person)
           throws IOException {
-       output.writeChars(person.getName());
+       output.writeChars(person.getTeamName());
        output.writeChars(person.getDescription());
     }
 

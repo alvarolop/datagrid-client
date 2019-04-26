@@ -30,33 +30,33 @@ public class CacheController {
 	
 	@PostMapping(path = "/team/{teamName}", consumes = "application/json")
 	public void addTeam (@PathVariable String teamName, @RequestBody String team) {
-	    FootballSpringApplication.cache.put(teamName, team);
+	    FootballSpringApplication.cacheString.put(teamName, team);
 	}
 	
 	@PostMapping(path = "/team/{teamName}/player/{playerName}", consumes = "application/json") //TODO
 	public void addPlayers(@PathVariable String teamName, @PathVariable String playerName) {      
-		FootballSpringApplication.cache.get(teamName);
+		FootballSpringApplication.cacheString.get(teamName);
 		log.error("This method is not implemented yet");
 	}
 	
 	@GetMapping(path = "/team")
 	public String printTeams() {
-	    return FootballSpringApplication.cache.values().toString();
+	    return FootballSpringApplication.cacheString.values().toString();
 	}
 	
 	@GetMapping(path = "/team/{teamName}")
 	public String getTeam(@PathVariable String teamName) {
-	    return FootballSpringApplication.cache.get(teamName);
+	    return FootballSpringApplication.cacheString.get(teamName);
 	}
 	
 	@DeleteMapping(path = "/team/{teamName}")
 	public void removeTeam(@PathVariable String teamName) {	
-		FootballSpringApplication.cache.remove(teamName);
+		FootballSpringApplication.cacheString.remove(teamName);
 	}
 	
 	@DeleteMapping(path = "/team/{teamName}/player/{playerName}") //TODO
 	public void removePlayer(@PathVariable String teamName, @PathVariable String playerName) {
-		FootballSpringApplication.cache.get(teamName);
+		FootballSpringApplication.cacheString.get(teamName);
 		log.error("This method is not implemented yet");
 	}
 	

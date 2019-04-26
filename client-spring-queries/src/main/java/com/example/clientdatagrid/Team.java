@@ -22,17 +22,25 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
+import org.infinispan.protostream.annotations.ProtoDoc;
+import org.infinispan.protostream.annotations.ProtoField;
+import org.infinispan.protostream.annotations.ProtoMessage;
+
 /**
  * @author Martin Gencur
  */
+@ProtoDoc("@Indexed")
 public class Team implements Serializable {
 
     private static final long serialVersionUID = -181403229462007401L;
 
-    private final String _type = "Team";
+//    private final String _type = "Team";
     private String teamName;
     private String description;
     private List<String> players;
+    
+	public Team() {
+	}
 
     public Team(String teamName) {
         this.teamName = teamName;
@@ -51,21 +59,36 @@ public class Team implements Serializable {
         this.players = Arrays.asList(players);
     }
     
-    public String getName() {
+    
+    @ProtoDoc("@Field(index=Index.YES, store = Store.YES, analyze = Analyze.NO)")
+    @ProtoField(number = 1, required = true)
+    public String getTeamName() {
         return teamName;
     }
     
-    public String get_type() {
-        return _type;
+	public void setTeamName(String teamName) {
+		this.teamName = teamName;
+	}
+    
+    @ProtoDoc("@Field(index=Index.YES, store = Store.YES, analyze = Analyze.YES)")
+    @ProtoField(number = 2, required = true)
+    public String getDescription() {
+        return description;
     }
+    
+	public void setDescription(String description) {
+		this.description = description;
+	}
 
+    @ProtoDoc("@Field(index=Index.NO, store = Store.NO, analyze = Analyze.NO)")
+    @ProtoField(number = 3, collectionImplementation = ArrayList.class)
     public List<String> getPlayers() {
         return players;
     }
     
-    public String getDescription() {
-        return description;
-    }
+	public void setPlayers(List<String> players) {
+		this.players = players;
+	}
 
     public void addPlayer(String name) {
         players.add(name);
@@ -77,8 +100,8 @@ public class Team implements Serializable {
     
     public String toJsonString() {
     	StringBuilder b = new StringBuilder("{");
-    	b.append("\"_type\":\"" + "Team" + "\",");
-        b.append("\"name\":\"" + teamName + "\",");
+    	b.append("\"_type\":\"" + "com.example.clientdatagrid.Team" + "\",");
+        b.append("\"teamName\":\"" + teamName + "\",");
         b.append("\"description\":\"" + description + "\",");
         b.append("\"players\":[");
         Iterator<String> iterator = players.iterator();
@@ -96,10 +119,9 @@ public class Team implements Serializable {
 
     @Override
     public String toString() {
-        StringBuilder b = new StringBuilder("=== Team: " + teamName + " ===\n");
-        b.append("Players:\n");
+        StringBuilder b = new StringBuilder("Team " + teamName + " (" + description + ") with");
         for (String player : players) {
-            b.append("- " + player + "\n");
+            b.append(" " + player + "");
         }
         return b.toString();
     }

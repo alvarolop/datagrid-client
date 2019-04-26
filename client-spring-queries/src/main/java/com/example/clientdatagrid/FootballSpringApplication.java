@@ -31,6 +31,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.infinispan.protostream.DescriptorParserException;
 import org.infinispan.protostream.FileDescriptorSource;
 import org.infinispan.protostream.SerializationContext;
+import org.infinispan.protostream.annotations.ProtoSchemaBuilder;
+import org.infinispan.protostream.annotations.ProtoSchemaBuilderException;
 
 
 @SpringBootApplication
@@ -43,7 +45,9 @@ public class FootballSpringApplication implements CommandLineRunner {
 	private int port;
 	
 	public static RemoteCacheManager cacheManager;
-	public static RemoteCache<String, String> cache;
+	public static RemoteCache<String, String> cacheString;
+	public static RemoteCache<String, Team> cachePojo;
+	public static RemoteCache<String, JsonNode> cacheJsonNode;
 	
 	Logger log = LoggerFactory.getLogger(this.getClass());
 	
@@ -68,68 +72,90 @@ public class FootballSpringApplication implements CommandLineRunner {
 	        		.valueMarshaller(new UTF8StringMarshaller()) // Serializes and deserializes strings and primitives as UTF8 byte arrays.
 	    		.build();
 	    
-	    Team team1 = new Team("Barcelona", "This is the initial team", new String[]{"Messi", "Pedro", "Puyol"});
-	    Team team2 = new Team("Madrid", "This is the second team", new String[]{"Benzema", "Ramos", "Bale"});
-	    
-		cacheManager = new RemoteCacheManager(configuration);
-		
-		RemoteCache<String, String> cacheDefault = cacheManager.getCache("default");
-		
-	    cache = cacheManager.getCache("default").withDataFormat(jsonString);
-	    
-		RegisterProtobuf(cacheManager);
-
-	    cache.put(team1.getName(), team1.toJsonString());
-	    
-	    cache.put(team2.getName(), team2.toJsonString());
-//	    cache.put(team3.getName(), team3.toJsonString());
-
-		log.info("-------> Loaded: " + cache.keySet().toString());
-			
-		QueryFactory queryFactory = Search.getQueryFactory(cache);
-
-		Query query1 = queryFactory.from("Team").having("name").eq("Barcelona").build();
-		Query query2 = queryFactory.create("from Team where name : 'Barcelona'");	
-
-//		Query query1 = queryFactory.create("from Team where description : 'This is the initial team'");
-//		Query query2 = queryFactory.create("from Team where name : 'Barcelona'");	
-		
-		log.info("-------> Query1: " + query1.list().toString());
-		log.info("-------> Query2: " + query2.list().toString());
-		
-//		cache.entrySet().stream().
-		
-		ObjectMapper objectMapper = new ObjectMapper();
-	    Team team3 = new Team("Atleti", "This is the third team", new String[]{"Griezmann", "Morata", "Costa"});
-	    String teamAsString = "";
-		try {
-			teamAsString = objectMapper.writeValueAsString(team3);
-		} catch (JsonProcessingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		log.info("-------> Team3: " + teamAsString);
-
-		
-		// Alternativelly, it's possible to request JSON values but marshalled/unmarshalled with a custom value marshaller that returns `org.codehaus.jackson.JsonNode` objects:
+//		Alternativelly, it's possible to request JSON values but marshalled/unmarshalled with a custom value marshaller that returns `org.codehaus.jackson.JsonNode` objects:
 //		DataFormat jsonNode = DataFormat.builder()
 //				.valueType(MediaType.APPLICATION_JSON)
 //				.valueMarshaller((Marshaller) new CustomJacksonMarshaller())
 //			.build();
+		
+		cacheManager = new RemoteCacheManager(configuration);
+		cachePojo = cacheManager.getCache("default");
+	    cacheString = cacheManager.getCache("default").withDataFormat(jsonString);
+//	    cacheJsonNode = cacheManager.getCache("default").withDataFormat(jsonNode);
 
-//		RemoteCache<String, JsonNode> jsonNodeCache = cache.withDataFormat(jsonNode);
-
+	    registerSchemasAndMarshallers(cacheManager);
 	    
+	    
+	    // Load information to the cache in several formats (POJO, JSON string)
+	    Team team1 = new Team("Barcelona", "This is the initial team", new String[]{"Messi", "Pedro", "Puyol"});
+	    Team team2 = new Team("Madrid", "This is the second team", new String[]{"Benzema", "Ramos", "Bale"});
+	    Team team3 = new Team("Atleti", "This is the third team", new String[]{"Griezmann", "Morata", "Costa"});
+	    
+		cachePojo.put(team1.getTeamName(), team1);
+		cachePojo.put(team2.getTeamName(), team2);
+		cacheString.put(team3.getTeamName(), team3.toJsonString());
 
+		log.info("-------> Teams loaded (POJO): " + cachePojo.keySet().toString());
+		log.info("-------> Teams loaded (String): " + cacheString.keySet().toString());
+
+		
+		// Queries to the RemoteCache <String, Team>
+		QueryFactory queryFactoryPojo = Search.getQueryFactory(cachePojo);
+
+		Query query1 = queryFactoryPojo.from(Team.class).having("teamName").like("Barcelona").build(); // Only for non-analyzed fields. Query DSL does not manage Full-text queries
+		Query query2 = queryFactoryPojo.create("from com.example.clientdatagrid.Team where teamName = 'Barcelona'"); // Use ":" for analyzed and "=" for non-analyzed
+		Query query3 = queryFactoryPojo.create("from com.example.clientdatagrid.Team where teamName = 'Atleti'"); // Use ":" for analyzed and "=" for non-analyzed
+
+		log.info("----> Queries to the RemoteCache <String, Team>");
+		log.info("-------> Query 1: " + query1.list().toString());
+		log.info("-------> Query 2: " + query2.list().toString());
+		log.info("-------> Query 3: " + query3.list().toString());
+		
+		// Queries to the RemoteCache <String, Team>
+		QueryFactory queryFactoryString = Search.getQueryFactory(cacheString);
+
+		Query query4 = queryFactoryString.from(Team.class).having("teamName").like("Barcelona").build(); // Only for non-analyzed fields. Query DSL does not manage Full-text queries
+		Query query5 = queryFactoryString.create("from com.example.clientdatagrid.Team where teamName = 'Barcelona'"); // Use ":" for analyzed and "=" for non-analyzed
+		Query query6 = queryFactoryString.create("from com.example.clientdatagrid.Team where teamName = 'Atleti'"); // Use ":" for analyzed and "=" for non-analyzed
+
+		log.info("----> Queries to the RemoteCache <String, String>");
+		log.info("-------> Query 1: " + query4.list().toString());
+		log.info("-------> Query 2: " + query5.list().toString());
+		log.info("-------> Query 3: " + query6.list().toString());
+
+
+		// Check that data stored with Pojo and String can be retrieved with Pojo and String
+		log.info("-------> Barcelona get (POJO): " + cachePojo.get("Barcelona"));
+		log.info("-------> Barcelona get (String): " + cacheString.get("Barcelona"));
+		log.info("-------> Atleti get (POJO): " + cachePojo.get("Atleti"));
+		log.info("-------> Atleti get (String): " + cacheString.get("Atleti"));
+		
+		
+		
+//		cache.entrySet().stream().
+
+//		ObjectMapper objectMapper = new ObjectMapper();
+//	    String teamAsString = "";
+//		try {
+//			teamAsString = objectMapper.writeValueAsString(team3);
+//		} catch (JsonProcessingException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//		log.info("-------> Team3: " + teamAsString);
+		
+
+
+//		cacheJsonNode = cache.withDataFormat(jsonNode);
 
 	}
 	
-	private void RegisterProtobuf(RemoteCacheManager cacheManager) {
+	private void registerSchemasAndMarshallers(RemoteCacheManager cacheManager) {
 		
 		SerializationContext serCtx = ProtoStreamMarshaller.getSerializationContext(cacheManager);
+/*
+		// Option 1: Define your own proto schema and register it
 	    FileDescriptorSource fds = new FileDescriptorSource();
-	    
 	    try {
 			fds.addProtoFiles("/team.proto");
 			serCtx.registerProtoFiles(fds);
@@ -140,26 +166,26 @@ public class FootballSpringApplication implements CommandLineRunner {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-	    
-		// register the schemas with the server too
-		RemoteCache<String, String> metadataCache = cacheManager.getCache(ProtobufMetadataManagerConstants.PROTOBUF_METADATA_CACHE_NAME);
-//		log.info("-->" + metadataCache.keySet().toString());
-//		log.info("-->" + metadataCache.getAll(metadataCache.keySet()).toString());
-		//Actually register the proto file
-		try (Scanner s = new Scanner(Config.class.getResourceAsStream("/team.proto"), "UTF-8")) {
-			String text = s.useDelimiter("\\A").next();
-			log.info("Registering proto file:\n" + text);
-			try {
-				metadataCache.put("team.proto", text);
-			} catch (Exception e) {
-				log.error("Error registering proto file");
-			}
+*/
+		// Register Team schema in the client
+		ProtoSchemaBuilder protoSchemaBuilder = new ProtoSchemaBuilder();
+		String memoSchemaFile = "";
+		try {
+			memoSchemaFile = protoSchemaBuilder.fileName("team.proto").packageName("com.example.clientdatagrid")
+					.addClass(Team.class).build(serCtx);
+		} catch (ProtoSchemaBuilderException | IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		
-			String errors = metadataCache.get(ProtobufMetadataManagerConstants.ERRORS_KEY_SUFFIX);
-			
-			if (errors != null) {
-				throw new IllegalStateException("Some Protobuf schema files contain errors:\n" + errors);
-			}
+//		log.info("--> Proto schema: " + memoSchemaFile);
+
+		// Register Team schema in the server
+		RemoteCache<String, String> metadataCache = cacheManager.getCache(ProtobufMetadataManagerConstants.PROTOBUF_METADATA_CACHE_NAME);
+	    metadataCache.put("memo.proto", memoSchemaFile);
+		String errors = metadataCache.get(ProtobufMetadataManagerConstants.ERRORS_KEY_SUFFIX);
+		if (errors != null) {
+			throw new IllegalStateException("Some Protobuf schema files contain errors:\n" + errors);
 		}
 	}
 }
