@@ -1,6 +1,7 @@
 package com.example.clientdatagrid;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.infinispan.client.hotrod.DataFormat;
 import org.infinispan.client.hotrod.RemoteCache;
@@ -45,7 +46,7 @@ public class FootballSpringApplication implements CommandLineRunner {
 	
 	public static RemoteCacheManager cacheManager;
 	public static RemoteCache<String, String> cacheString;
-	public static RemoteCache<String, Team> cachePojo;
+	public static RemoteCache<String, Team> cacheTeam;
 	public static RemoteCache<String, JsonNode> cacheJsonNode;
 	
 	Logger log = LoggerFactory.getLogger(this.getClass());
@@ -78,35 +79,31 @@ public class FootballSpringApplication implements CommandLineRunner {
 //			.build();
 		
 		cacheManager = new RemoteCacheManager(configuration);
-		cachePojo = cacheManager.getCache(cacheName);
+		cacheTeam = cacheManager.getCache(cacheName);
 	    cacheString = cacheManager.getCache(cacheName).withDataFormat(jsonString);
 //	    cacheJsonNode = cacheManager.getCache("default").withDataFormat(jsonNode);
 
 	    registerSchemas(cacheManager);
+	    log.info("-------> Schemas registered");
 	    
 	    
-	    
-	    // Load information to the cache in several formats (POJO, JSON string)
-	    Team team1 = new Team("Barcelona", "This is the initial team", new String[]{"Messi", "Pedro", "Puyol"});
-	    Team team2 = new Team("Madrid", "This is the second team", new String[]{"Benzema", "Ramos", "Bale"});
-	    Team team3 = new Team("Atleti", "This is the third team", new String[]{"Griezmann", "Morata", "Costa"});
-	    
-		cachePojo.put(team1.getTeamName(), team1);
-		cachePojo.put(team2.getTeamName(), team2);
-		cacheString.put(team3.getTeamName(), team3.toJsonString());
+	    // Load information to the cache in several formats (Team, JSON string)
+	    cacheTeam.put("Barcelona", new Team("Barcelona", "This is the initial team", new String[]{"Messi", "Pedro", "Puyol"}));
+	    cacheTeam.put("Madrid", new Team("Madrid", "This is the second team", new String[]{"Benzema", "Ramos", "Bale"}));
+		cacheString.put("Atleti", (new Team("Atleti", "This is the third team", new String[]{"Griezmann", "Morata", "Costa"})).toJsonString());
 
-		log.info("-------> Teams loaded (POJO): " + cachePojo.keySet().toString());
+		log.info("-------> Teams loaded (Team): " + cacheTeam.keySet().toString());
 		log.info("-------> Teams loaded (String): " + cacheString.keySet().toString());
 
 		
 		
 		
 		// Queries to the RemoteCache <String, Team>
-		QueryFactory queryFactoryPojo = Search.getQueryFactory(cachePojo);
+		QueryFactory queryFactoryTeam = Search.getQueryFactory(cacheTeam);
 
-		Query query1 = queryFactoryPojo.from(Team.class).having("teamName").like("Barcelona").build(); // Only for non-analyzed fields. Query DSL does not manage Full-text queries
-		Query query2 = queryFactoryPojo.create("from com.example.clientdatagrid.Team where teamName = 'Barcelona'"); // Use ":" for analyzed and "=" for non-analyzed
-		Query query3 = queryFactoryPojo.create("from com.example.clientdatagrid.Team where teamName = 'Atleti'"); // Use ":" for analyzed and "=" for non-analyzed
+		Query query1 = queryFactoryTeam.from(Team.class).having("teamName").like("Barcelona").build(); // Only for non-analyzed fields. Query DSL does not manage Full-text queries
+		Query query2 = queryFactoryTeam.create("from com.example.clientdatagrid.Team where teamName = 'Barcelona'"); // Use ":" for analyzed and "=" for non-analyzed
+		Query query3 = queryFactoryTeam.create("from com.example.clientdatagrid.Team where teamName = 'Atleti'"); // Use ":" for analyzed and "=" for non-analyzed
 
 		log.info("----> Queries to the RemoteCache <String, Team>");
 		log.info("-------> Query 1: " + query1.list().toString());
@@ -124,17 +121,30 @@ public class FootballSpringApplication implements CommandLineRunner {
 		Query query6 = queryFactoryString.create("from com.example.clientdatagrid.Team where teamName = 'Atleti'"); // Use ":" for analyzed and "=" for non-analyzed
 
 		log.info("----> Queries to the RemoteCache <String, String>");
-		log.info("-------> Query 1: " + query4.list().toString());
-		log.info("-------> Query 2: " + query5.list().toString());
-		log.info("-------> Query 3: " + query6.list().toString());
+		log.info("-------> Query 4: " + query4.list().toString());
+		log.info("-------> Query 5: " + query5.list().toString());
+		log.info("-------> Query 6: " + query6.list().toString());
 
 
-		// Check that data stored with Pojo and String can be retrieved with Pojo and String
-		log.info("-------> Barcelona get (POJO): " + cachePojo.get("Barcelona"));
+		// Check that data stored with Team and String can be retrieved with Team and String
+		log.info("-------> Barcelona get (Team): " + cacheTeam.get("Barcelona"));
 		log.info("-------> Barcelona get (String): " + cacheString.get("Barcelona"));
-		log.info("-------> Atleti get (POJO): " + cachePojo.get("Atleti"));
+		log.info("-------> Atleti get (Team): " + cacheTeam.get("Atleti"));
 		log.info("-------> Atleti get (String): " + cacheString.get("Atleti"));
 		
+		
+		// Example: How to remove all the teams with name == Atleti
+		log.info("-------> Query 7: " + queryFactoryString.create("from com.example.clientdatagrid.Team").list().toString());
+		List<Team> removeList = queryFactoryTeam.create("from com.example.clientdatagrid.Team where teamName = 'Atleti'").list();
+		log.info("-------> Remove list: " + removeList.toString());
+		for (Team team : removeList ) {
+			cacheTeam.remove(team.getTeamName());
+		}
+
+		log.info("-------> Query 8(String): " + queryFactoryString.create("select teamName from com.example.clientdatagrid.Team").list().toString());
+		log.info("-------> Query 8(Team): " + queryFactoryString.create("select teamName from com.example.clientdatagrid.Team").list().toString());
+		
+
 		
 		
 //		cache.entrySet().stream().
@@ -158,7 +168,6 @@ public class FootballSpringApplication implements CommandLineRunner {
 	private void registerSchemas(RemoteCacheManager cacheManager) {
 		
 		SerializationContext serCtx = ProtoStreamMarshaller.getSerializationContext(cacheManager);
-		
 		// Register Team schema in the client
 		ProtoSchemaBuilder protoSchemaBuilder = new ProtoSchemaBuilder();
 		String memoSchemaFile = "";
@@ -169,12 +178,13 @@ public class FootballSpringApplication implements CommandLineRunner {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-		
+//		serCtx.registerMarshaller(new CustomJacksonMarshaller());
+
 //		log.info("--> Proto schema: " + memoSchemaFile);
 
 		// Register Team schema in the server
 		RemoteCache<String, String> metadataCache = cacheManager.getCache(ProtobufMetadataManagerConstants.PROTOBUF_METADATA_CACHE_NAME);
-	    metadataCache.put("memo.proto", memoSchemaFile);
+	    metadataCache.put("team.proto", memoSchemaFile);
 		String errors = metadataCache.get(ProtobufMetadataManagerConstants.ERRORS_KEY_SUFFIX);
 		if (errors != null) {
 			throw new IllegalStateException("Some Protobuf schema files contain errors:\n" + errors);
