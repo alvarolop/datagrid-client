@@ -5,6 +5,7 @@ Example of remote queries using Query DSL and Ickle.
 <!-- TOC -->
 
 - [client-spring-queries](#client-spring-queries)
+  - [0. Project configuration](#0-project-configuration)
   - [1. Configure RHDG client](#1-configure-rhdg-client)
   - [2. Configure RHDG Server: Configure the cache for indexing](#2-configure-rhdg-server-configure-the-cache-for-indexing)
   - [3. Configure the client to use Protocol Buffers](#3-configure-the-client-to-use-protocol-buffers)
@@ -17,6 +18,17 @@ Example of remote queries using Query DSL and Ickle.
   - [10. Remote script to evict entries.](#10-remote-script-to-evict-entries)
 
 <!-- /TOC -->
+
+## 0. Project configuration
+
+To connect the RHDG client to the remote server, modify the `application.properties` file under `/src/main/resources`.
+
+```
+datagrid.host=${DATAGRID_HOST:<server-hostname>}
+datagrid.port=${DATAGRID_PORT:11222}
+datagrid.cache=${DATAGRID_CACHE:default}
+```
+
 ## 1. Configure RHDG client
 
 Add the remote queries dependency in the pom.xml.
