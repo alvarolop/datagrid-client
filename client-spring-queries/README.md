@@ -14,8 +14,7 @@ Example of remote queries using Query DSL and Ickle.
   - [7. Performing queries using JSON and the REST API](#7-performing-queries-using-json-and-the-rest-api)
   - [8. Performing queries using String containing JSON and Java Hot Rod](#8-performing-queries-using-string-containing-json-and-java-hot-rod)
   - [9. Evicting entries using queries](#9-evicting-entries-using-queries)
-  - [TODO: 10. Remote script to evict entries.](#todo-10-remote-script-to-evict-entries)
-  - [TODO: 11. Protobuf fields](#todo-11-protobuf-fields)
+  - [10. Remote script to evict entries.](#10-remote-script-to-evict-entries)
 
 <!-- /TOC -->
 ## 1. Configure RHDG client
@@ -260,7 +259,9 @@ Using Query DSL or Ickle queries is limited by two factors:
 - It is not possible to remove or update entries, only retrieve them.
 - The list retrieved only contains the values on the entries, not the keys.
 
-The best option to evict multiple entries based on a query is storing the key under inside the value object and then remove from the cache all the results of the cache:
+The best option to evict multiple entries based on a query is storing the key inside the value object and then remove from the cache all the results of the query.
+
+In the following examples, the key used to store teams in the teamName and, therefore, they can be removed using the teamName field. The query looks for all the teams named 'Atleti' and removes them from the cache.
 
 ```java
 List<Team> removeList = queryFactoryTeam.create("from com.example.clientdatagrid.Team where teamName = 'Atleti'").list();
@@ -269,19 +270,77 @@ for (Team team : removeList ) {
     cacheTeam.remove(team.getTeamName());
 }
 ```
-In the previous example, the key used to store teams in the teamName and, therefore, they can be removed using the teamName field.
+
+In the example above we are using the `queryFactoryTeam` from the `remoteCacheTeam<String,Team>`. Therefore, the response of the query es converted to Team automatically.
+
+The following example is similar, but using projections, so only the `teamName` field is retrieved. 
+
+```java
+List<Object[]> results =  queryFactoryTeam.create("select teamName from com.example.clientdatagrid.Team where teamName = 'Atleti'").list();
+log.info("-------> List of teams: " + results.toString());
+for (Object[] team : results ) {
+    log.info("-------> " + cacheTeam.get(team[0]).toString()); 
+    cacheTeam.remove(team[0]);
+}
+```
+
+For more information about Projections, check the following link:
+https://access.redhat.com/documentation/en-us/red_hat_data_grid/7.2/html/developer_guide/the_infinispan_query_dsl#projection_queries
+
+
+This third example would do the same. It does not use a `for` loop,but the method keySet(). This method returns a `CloseableIteratorSet` to invoke methods to a subset of the cache.
+
+```java
+Set<String> teams = queryFactoryTeam.create("select teamName from com.example.clientdatagrid.Team where teamName = 'Atleti'")
+            .<Object[]>list()
+            .stream().map(row -> (String) row[0])
+            .collect(Collectors.toSet());
+
+cacheTeam.keySet().removeAll(teams);
+```
+
+For more information about `keySet()` and `CloseableIteratorSet`, check the Hot Rod API:
+https://docs.jboss.org/infinispan/9.3/apidocs/org/infinispan/client/hotrod/RemoteCache.html#keySet--
+
 
 The main burden is possibly the roundtrip of the remove() action. In RHDG 8 we will probably have a removeAsync() operation for this purpose.
 
 
-## TODO: 10. Remote script to evict entries.
+
+## 10. Remote script to evict entries.
+
+Scripting is a feature of Red Hat Data Grid Server which allows invoking server-side scripts from remote clients. Scripting leverages the JDK’s javax.script ScriptEngines, therefore allowing the use of any JVM languages which offer one. By default, the JDK comes with Nashorn, a ScriptEngine capable of running JavaScript.
+
+For example, to put values to a cache, just define the following JS script and load it to the special script cache, named '___script_cache':
+
+```java
+private void registerScripts(RemoteCacheManager cacheManager) {
+
+    String script = "// mode=local,language=javascript\n"
+            + "var cache = cacheManager.getCache(\"default\");\n"
+            + "cache.put(key, value);";
+    
+    RemoteCache<String, String> scriptCache = cacheManager.getCache("___script_cache");
+    scriptCache.put("putEntries.js", script);
+}
+```
+
+After registering the script in RHDG, executing the script is as simple as calling the `execute()` method with the correct params:
 
 
+```java
+Map<String, Object> params = new HashMap<>();
+params.put("key", "myKey");
+params.put("value", "myValue");
+Object result = cacheTeam.execute("putEntries.js", params);
+```
 
 
-## TODO: 11. Protobuf fields
+Documentation Executing code in the grid:
+https://access.redhat.com/documentation/en-us/red_hat_data_grid/7.3/html-single/red_hat_data_grid_user_guide/index#execute_code_remote_grid
 
-Difference between Analyzed, store, and not.
+Documentation of the Node.js client: 
+https://access.redhat.com/documentation/en-us/red_hat_data_grid/7.2/html/developer_guide/the_hot_rod_interface#hot_rod_node_js_client
 
-
-
+Node.js API:
+https://access.redhat.com/webassets/avalon/d/red-hat-data-grid/7.3/node/Client.html

@@ -1,7 +1,11 @@
 package com.example.clientdatagrid;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.infinispan.client.hotrod.DataFormat;
 import org.infinispan.client.hotrod.RemoteCache;
@@ -63,7 +67,7 @@ public class FootballSpringApplication implements CommandLineRunner {
 	    			.port(port)
 		    		.marshaller(new ProtoStreamMarshaller())
 	    		.build();
-	    		
+		
 		log.info("-------> Data Grid host: " + host);
 		log.info("-------> Data Grid port: " + port);
 		
@@ -84,7 +88,9 @@ public class FootballSpringApplication implements CommandLineRunner {
 //	    cacheJsonNode = cacheManager.getCache("default").withDataFormat(jsonNode);
 
 	    registerSchemas(cacheManager);
-	    log.info("-------> Schemas registered");
+	    registerScripts(cacheManager);
+	    log.info("-------> Schemas and scripts registered");
+	    
 	    
 	    
 	    // Load information to the cache in several formats (Team, JSON string)
@@ -140,12 +146,38 @@ public class FootballSpringApplication implements CommandLineRunner {
 		for (Team team : removeList ) {
 			cacheTeam.remove(team.getTeamName());
 		}
+		
+		List<Object[]> results =  queryFactoryTeam.create("select teamName from com.example.clientdatagrid.Team where country = 'Spain'").list();
+		log.info("-------> List of teams: " + results.toString());
+		for (Object[] team : results ) {
+			log.info("-------> " + cacheTeam.get(team[0]).toString()); 
+			cacheTeam.remove(team[0]);
+		}
+		
+		
+		Set<String> teams = queryFactoryTeam.create("select teamName from com.example.clientdatagrid.Team where country = 'Spain'")
+				   .<Object[]>list()
+				   .stream().map(row -> (String) row[0])
+				   .collect(Collectors.toSet());
+
+		cacheTeam.keySet().removeAll(teams);
 
 		log.info("-------> Query 8(String): " + queryFactoryString.create("select teamName from com.example.clientdatagrid.Team").list().toString());
 		log.info("-------> Query 8(Team): " + queryFactoryString.create("select teamName from com.example.clientdatagrid.Team").list().toString());
 		
 
+
 		
+		// Use remote scripts to remove tasks
+		
+		
+        Map<String, Object> params = new HashMap<>();
+        params.put("key", "myKey");
+        params.put("value", "myValue");
+ 
+        log.info("-------> Get \"myKey\": " + cacheString.get("myKey"));
+        Object result = cacheTeam.execute("removeEntries.js", params);
+        log.info("-------> Get \"myKey\": " + cacheString.get("myKey"));
 		
 //		cache.entrySet().stream().
 
@@ -189,6 +221,21 @@ public class FootballSpringApplication implements CommandLineRunner {
 		if (errors != null) {
 			throw new IllegalStateException("Some Protobuf schema files contain errors:\n" + errors);
 		}
+	}
+	
+	private void registerScripts(RemoteCacheManager cacheManager) {
+
+        String script = "// mode=local,language=javascript\n"
+//                + "key*value\n"
+                + "var cache = cacheManager.getCache(\"default\");\n"
+//                + "cache.clear();\n"
+                + ""
+                + "cache.remove(key, value);";
+		
+        RemoteCache<String, String> scriptCache = cacheManager.getCache("___script_cache");
+        scriptCache.put("removeEntries.js", script);
+        
+        
 	}
 }
 
