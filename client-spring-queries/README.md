@@ -1,7 +1,7 @@
 client-spring-queries
 =====================
 
-Example of remote queries using Query DSL and Ickle. 
+Example of remote queries using Query DSL and Ickle.
 <!-- TOC -->
 
 - [client-spring-queries](#client-spring-queries)
@@ -19,7 +19,7 @@ Example of remote queries using Query DSL and Ickle.
 <!-- /TOC -->
 ## 1. Configure RHDG client
 
-Add the queries dependency in the pom.xml
+Add the remote queries dependency in the pom.xml.
 
 ```xml
 <dependency>
@@ -30,21 +30,23 @@ Add the queries dependency in the pom.xml
 
 ## 2. Configure RHDG Server: Configure the cache for indexing
 
-For testing purposes you can use a local cache
+Add the indexing field in the cache configuration. The easiest way is using `auto-config=true`.
+
 ```xml
 <local-cache name="default" statistics="true">
-            <indexing index="ALL" auto-config="true"/>
+    <indexing index="ALL" auto-config="true"/>
 </local-cache>
 ```
-More information: https://access.redhat.com/documentation/en-us/red_hat_data_grid/7.3/html-single/red_hat_data_grid_user_guide/index#indexing
+
+In this case, I am using a local-cache for simplicity.
+
+More information about configuring indexing in the documentation: https://access.redhat.com/documentation/en-us/red_hat_data_grid/7.3/html/red_hat_data_grid_user_guide/indexing_querying#indexing
 
 ## 3. Configure the client to use Protocol Buffers
 
-https://access.redhat.com/documentation/en-us/red_hat_data_grid/7.3/html/red_hat_data_grid_user_guide/indexing_querying#storing_protobuf
+In order to enable indexing, the entities put in the cache by clients can no longer be opaque binary blobs understood solely by the client. The encoding format used in RHDG in Remote mode is Protocol Buffers. 
 
-In order to enable indexing, the entities put in the cache by clients can no longer be opaque binary blobs understood solely by the client.The encoding format used in RHDG in Remote mode is Protocol Buffers. 
-
-First, the client must be configured to use a dedicated marshaller, ProtoStreamMarshaller:
+**First**, the client must be configured to use a dedicated marshaller, ProtoStreamMarshaller:
 
 ```java
 Configuration configuration = new ConfigurationBuilder()
@@ -57,7 +59,7 @@ Configuration configuration = new ConfigurationBuilder()
 RemoteCacheManager cacheManager = new RemoteCacheManager(configuration);
 ```
 
-Second, we have to instruct the ProtoStream library on how to marshall your message types. We do so using annotations in the Team class:
+**Second**, instruct the ProtoStream library on how to marshall your message types. We do so using annotations in the Team class:
 
 ```java
 @ProtoDoc("@Indexed")
@@ -93,11 +95,11 @@ public class Team {
 }
 ```
 
-**NOTE**
+**NOTE**: As we are using protobuf schemas, the class Team may not implement Serializable.
 
-As we are using protobuf schemas, the class Team does not implement Serializable.
 
-After that the Proto file is automatically generated and loaded to the client context using the following code:
+
+**Third**, the Proto file is automatically generated and loaded to the client context using the following code:
 
 ```java
 SerializationContext serCtx = ProtoStreamMarshaller.getSerializationContext(cacheManager);
@@ -139,9 +141,13 @@ message Team {
 }
 
 ```
+
+Check the section in the documentation that explains how to configure remote queries: https://access.redhat.com/documentation/en-us/red_hat_data_grid/7.3/html/red_hat_data_grid_user_guide/indexing_querying#storing_protobuf
+
 Check the following link to read more about @ProtoDoc and @ProtoField: https://access.redhat.com/documentation/en-us/red_hat_data_grid/7.0/html/developer_guide/sect-Protobuf_Encoding#Defining_Protocol_Buffers_Schemas_With_Java_Annotations
 
 Check the following link to read more about the index, store and analyze fields: https://access.redhat.com/documentation/en-us/red_hat_data_grid/7.2/html-single/developer_guide/index#field
+
 
 ## 4. Register the Protobuf schema in the server
 
@@ -158,6 +164,8 @@ if (errors != null) {
 
 ## 5. Loading the cache with some teams
 
+These are the teams that are loaded in the code to test queries. We use the class attribute `teamName` as the key.
+
 ```java
 RemoteCache<String, Team> cacheTeam = cacheManager.getCache(cacheName);
 
@@ -168,7 +176,7 @@ cacheTeam.put("Atleti", new Team("Atleti", "This is the third team", new String[
 
 ## 6. Querying RHDG
 
-The key part of creating a query is obtaining the QueryFactory for the remote cache using the org.infinispan.client.hotrod.Search.getQueryFactory() method. After that, you can use Query DSL or Ickle.
+The key part of creating a query is obtaining the QueryFactory for the remote cache using the `org.infinispan.client.hotrod.Search.getQueryFactory()` method. After that, you can use Query DSL or Ickle.
 
 ```java
 QueryFactory qf = Search.getQueryFactory(cacheTeam);
@@ -186,18 +194,18 @@ Check the documentation: https://access.redhat.com/documentation/en-us/red_hat_d
 
 
 ### Ickle: query2
-This is the most complete way of querying. It allows normal and full-text queries.
+This is the most complete way of querying. It allows normal and full-text queries. Ickle is the recommended way of making queries in RHDG.
 
 When querying a field:
 - If a field is analyzed, queries must use **"\<fieldName> : \<fieldValue>"**. E.g. description is analyzed: `"from com.example.clientdatagrid.Team where description : 'This is the initial team'"`
-- If the field is not anylized, queries must use **"\<fieldName> = \<fieldValue>"**. E.g. teamName is not analyzed: `"from com.example.clientdatagrid.Team where teamName = 'Barcelona'"`
+- If the field is not analyzed, queries must use **"\<fieldName> = \<fieldValue>"**. E.g. teamName is not analyzed: `"from com.example.clientdatagrid.Team where teamName = 'Barcelona'"`
 
 Check the documentation for more information about queries: https://access.redhat.com/documentation/en-us/red_hat_data_grid/7.3/html/red_hat_data_grid_user_guide/indexing_querying#query_ickle
 
 
 ## 7. Performing queries using JSON and the REST API
 
-If the REST server endpoint is enabled, you can now perform puts, gets and queries directly using REST:
+If the REST server endpoint is enabled, you can now perform puts, gets and queries directly using REST. These are some examples:
 
 ```bash
 # Get all the keys from cache 'default'
@@ -222,7 +230,7 @@ $ curl -v -H "Content-Type: application/json; charset=UTF-8" http://node0.dg.vm:
 ```
 
 **IMPORTANT**
-When writing a JSON document, a special field _type must be present in the document to identify the protobuf Message corresponding to the document.
+When writing a JSON document, a special field `_type` must be present in the document to identify the protobuf Message corresponding to the document.
 
 ```json
 {"_type":"com.example.clientdatagrid.Team","teamName":"Barcelona","description":"This is the initial team","players":["Messi","Pedro","Puyol"]}
@@ -249,7 +257,7 @@ Now you can perform operations using Teams converted to jsonstring and including
 cacheString.put("Atleti", (new Team("Atleti", "This is the third team", new String[]{"Griezmann", "Morata", "Costa"})).toJsonString());
 ```
 
-Using this configuration, you can perform actions using Team objects or JSON strings interchangeably. This way, you can use the cache normally using Team objects, but you can access the cache using a Java Hot Rod client that does not have the Team class using JSON strings.
+Using this configuration, you can perform actions using Team objects or JSON strings interchangeably. You can use the cache normally using Team objects, but you can access the cache using another Java Hot Rod client that does not have the Team class using JSON strings.
 
 
 ## 9. Evicting entries using queries
@@ -303,7 +311,7 @@ For more information about `keySet()` and `CloseableIteratorSet`, check the Hot 
 https://docs.jboss.org/infinispan/9.3/apidocs/org/infinispan/client/hotrod/RemoteCache.html#keySet--
 
 
-The main burden is possibly the roundtrip of the remove() action. In RHDG 8 we will probably have a removeAsync() operation for this purpose.
+The main burden is possibly the roundtrip of the remove() action.
 
 
 
