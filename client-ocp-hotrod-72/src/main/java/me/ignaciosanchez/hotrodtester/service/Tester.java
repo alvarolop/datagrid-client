@@ -22,7 +22,7 @@ import java.util.Random;
 @org.springframework.context.annotation.Configuration
 public class Tester {
 	
-	Logger log = LoggerFactory.getLogger(this.getClass());
+	Logger logger = LoggerFactory.getLogger(Tester.class);
 
     @Autowired
     RemoteCacheManager rcm;
@@ -99,6 +99,8 @@ public class Tester {
             @RequestParam(value = "minkey", required=false) Integer entryMinkey) {
 
         RemoteCache<String, byte[]> cache = rcm.getCache(cacheName);
+        
+        logger.info("--------> /api/cache/{cache}/put ");
 
         int min = 0;
         if (entryMinkey != null)
@@ -113,7 +115,7 @@ public class Tester {
 
         for (int i=min; i<(min + numEntries) ; i++) {
         	
-    		log.info("--> Put " + i);
+    		logger.info("--------> Put " + i);
 
             rnd.nextBytes(bytes);
 
