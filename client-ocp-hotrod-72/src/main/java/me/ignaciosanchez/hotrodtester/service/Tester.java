@@ -6,6 +6,8 @@ import org.infinispan.commons.configuration.XMLStringConfiguration;
 import org.infinispan.configuration.cache.CacheMode;
 import org.infinispan.configuration.cache.Configuration;
 import org.infinispan.configuration.cache.ConfigurationBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,6 +21,8 @@ import java.util.Random;
 @RestController
 @org.springframework.context.annotation.Configuration
 public class Tester {
+	
+	Logger log = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
     RemoteCacheManager rcm;
@@ -109,6 +113,8 @@ public class Tester {
         Random rnd = new Random();
 
         for (int i=min; i<(min + numEntries) ; i++) {
+        	
+    		log.error("--> Put " + i);
 
             rnd.nextBytes(bytes);
 
