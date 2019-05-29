@@ -101,6 +101,7 @@ public class Tester {
         RemoteCache<String, byte[]> cache = rcm.getCache(cacheName);
         
         logger.info("--------> /api/cache/{cache}/put ");
+        System.out.println("--------> /api/cache/{cache}/put ");
 
         int min = 0;
         if (entryMinkey != null)
@@ -116,6 +117,7 @@ public class Tester {
         for (int i=min; i<(min + numEntries) ; i++) {
         	
     		logger.info("--------> Put " + i);
+    		System.out.println("--------> Put " + i);
 
             rnd.nextBytes(bytes);
 
