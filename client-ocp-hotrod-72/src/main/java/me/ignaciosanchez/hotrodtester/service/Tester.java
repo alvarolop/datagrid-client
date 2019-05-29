@@ -73,8 +73,7 @@ public class Tester {
     }
 
     @GetMapping("/api/cache/{cache}/create")
-    public String create(
-            @PathVariable(value = "cache") String cacheName) {
+    public String create(@PathVariable(value = "cache") String cacheName) {
 
         Configuration config = new ConfigurationBuilder()
                 .clustering().cacheMode(CacheMode.DIST_ASYNC)
@@ -114,7 +113,7 @@ public class Tester {
 
         for (int i=min; i<(min + numEntries) ; i++) {
         	
-    		log.error("--> Put " + i);
+    		log.info("--> Put " + i);
 
             rnd.nextBytes(bytes);
 
