@@ -68,10 +68,10 @@ public class FootballSpringApplication implements CommandLineRunner {
 		log.info("-------> Data Grid host: " + host);
 		log.info("-------> Data Grid port: " + port);
 		
-//	    DataFormat jsonString = DataFormat.builder()
-//	    			.valueType(MediaType.APPLICATION_JSON)
-//	        		.valueMarshaller(new UTF8StringMarshaller()) // Serializes and deserializes strings and primitives as UTF8 byte arrays.
-//	    		.build();
+	    DataFormat jsonString = DataFormat.builder()
+	    			.valueType(MediaType.APPLICATION_JSON)
+	        		.valueMarshaller(new UTF8StringMarshaller()) // Serializes and deserializes strings and primitives as UTF8 byte arrays.
+	    		.build();
 	    
 //		Alternativelly, it's possible to request JSON values but marshalled/unmarshalled with a custom value marshaller that returns `org.codehaus.jackson.JsonNode` objects:
 //		DataFormat jsonNode = DataFormat.builder()
@@ -81,7 +81,7 @@ public class FootballSpringApplication implements CommandLineRunner {
 		
 		cacheManager = new RemoteCacheManager(configuration);
 		cacheTeam = cacheManager.getCache(cacheName);
-//	    cacheString = cacheManager.getCache(cacheName).withDataFormat(jsonString);
+	    cacheString = cacheManager.getCache(cacheName).withDataFormat(jsonString);
 ////	    cacheJsonNode = cacheManager.getCache("default").withDataFormat(jsonNode);
 
 	    registerSchemas(cacheManager);
@@ -93,10 +93,10 @@ public class FootballSpringApplication implements CommandLineRunner {
 	    // Load information to the cache in several formats (Team, JSON string)
 	    cacheTeam.put("Barcelona", new Team("Barcelona", "This is the initial team", new String[]{"Messi", "Pedro", "Puyol"}));
 	    cacheTeam.put("Madrid", new Team("Madrid", "This is the second team", new String[]{"Benzema", "Ramos", "Bale"}));
-//		cacheString.put("Atleti", (new Team("Atleti", "This is the third team", new String[]{"Griezmann", "Morata", "Costa"})).toJsonString());
+		cacheString.put("Atleti", (new Team("Atleti", "This is the third team", new String[]{"Griezmann", "Morata", "Costa"})).toJsonString());
 
 		log.info("-------> Teams loaded (Team): " + cacheTeam.keySet().toString());
-//		log.info("-------> Teams loaded (String): " + cacheString.keySet().toString());
+		log.info("-------> Teams loaded (String): " + cacheString.keySet().toString());
 
 		
 		
@@ -106,12 +106,12 @@ public class FootballSpringApplication implements CommandLineRunner {
 
 		Query query1 = queryFactoryTeam.from(Team.class).having("teamName").like("Barcelona").build(); // Only for non-analyzed fields. Query DSL does not manage Full-text queries
 		Query query2 = queryFactoryTeam.create("from com.example.clientdatagrid.Team where teamName = 'Barcelona'"); // Use ":" for analyzed and "=" for non-analyzed
-//		Query query3 = queryFactoryTeam.create("from com.example.clientdatagrid.Team where teamName = 'Atleti'"); // Use ":" for analyzed and "=" for non-analyzed
+		Query query3 = queryFactoryTeam.create("from com.example.clientdatagrid.Team where teamName = 'Atleti'"); // Use ":" for analyzed and "=" for non-analyzed
 
 		log.info("----> Queries to the RemoteCache <String, Team>");
 		log.info("-------> Query 1: " + query1.list().toString());
 		log.info("-------> Query 2: " + query2.list().toString());
-//		log.info("-------> Query 3: " + query3.list().toString());
+		log.info("-------> Query 3: " + query3.list().toString());
 		
 		
 		
