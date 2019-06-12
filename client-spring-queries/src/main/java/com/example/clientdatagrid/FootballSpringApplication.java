@@ -68,10 +68,10 @@ public class FootballSpringApplication implements CommandLineRunner {
 		log.info("-------> Data Grid host: " + host);
 		log.info("-------> Data Grid port: " + port);
 		
-	    DataFormat jsonString = DataFormat.builder()
-	    			.valueType(MediaType.APPLICATION_JSON)
-	        		.valueMarshaller(new UTF8StringMarshaller()) // Serializes and deserializes strings and primitives as UTF8 byte arrays.
-	    		.build();
+//	    DataFormat jsonString = DataFormat.builder()
+//	    			.valueType(MediaType.APPLICATION_JSON)
+//	        		.valueMarshaller(new UTF8StringMarshaller()) // Serializes and deserializes strings and primitives as UTF8 byte arrays.
+//	    		.build();
 	    
 //		Alternativelly, it's possible to request JSON values but marshalled/unmarshalled with a custom value marshaller that returns `org.codehaus.jackson.JsonNode` objects:
 //		DataFormat jsonNode = DataFormat.builder()
@@ -81,7 +81,7 @@ public class FootballSpringApplication implements CommandLineRunner {
 		
 		cacheManager = new RemoteCacheManager(configuration);
 		cacheTeam = cacheManager.getCache(cacheName);
-	    cacheString = cacheManager.getCache(cacheName).withDataFormat(jsonString);
+//	    cacheString = cacheManager.getCache(cacheName).withDataFormat(jsonString);
 ////	    cacheJsonNode = cacheManager.getCache("default").withDataFormat(jsonNode);
 
 	    registerSchemas(cacheManager);
