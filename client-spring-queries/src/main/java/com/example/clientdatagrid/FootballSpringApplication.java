@@ -84,7 +84,7 @@ public class FootballSpringApplication implements CommandLineRunner {
 //	    cacheString = cacheManager.getCache(cacheName).withDataFormat(jsonString);
 ////	    cacheJsonNode = cacheManager.getCache("default").withDataFormat(jsonNode);
 
-//	    registerSchemas(cacheManager);
+	    registerSchemas(cacheManager);
 //	    registerScripts(cacheManager);
 	    log.info("-------> Schemas and scripts registered");
 	    
