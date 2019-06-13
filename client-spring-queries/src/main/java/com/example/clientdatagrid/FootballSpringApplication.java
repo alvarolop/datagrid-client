@@ -47,7 +47,7 @@ public class FootballSpringApplication implements CommandLineRunner {
 	private String cacheName;
 	
 	@Value("${datagrid.version}")
-	private String rhdgVersion;
+	private double rhdgVersion;
 	
 	public static RemoteCacheManager cacheManager;
 	public static RemoteCache<String, String> cacheString;
@@ -68,15 +68,15 @@ public class FootballSpringApplication implements CommandLineRunner {
 	    			.port(port)
 		    		.marshaller(new ProtoStreamMarshaller());
 		
-		if (rhdgVersion == "7.2") {
+		if (rhdgVersion == 7.2) {
 			log.info("-------> Data Grid version: 7.2");
 			configurationBuilder.version(ProtocolVersion.PROTOCOL_VERSION_25);
 			
-		} else if (rhdgVersion == "7.3") {
+		} else if (rhdgVersion == 7.3) {
 			log.info("-------> Data Grid version: 7.3");
 			
 		} else {
-			log.info("-------> Data Grid version: Missconfigured");
+			log.info("-------> Data Grid version: Missconfigured (" + rhdgVersion + ")");
 		}
 		Configuration configuration = configurationBuilder.build();
 		
