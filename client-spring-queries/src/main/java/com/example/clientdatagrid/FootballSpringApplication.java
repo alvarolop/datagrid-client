@@ -68,9 +68,17 @@ public class FootballSpringApplication implements CommandLineRunner {
 	    			.port(port)
 		    		.marshaller(new ProtoStreamMarshaller());
 		
-		if (rhdgVersion == 7.2) {
-			log.info("-------> Data Grid version: 7.2");
+		if (rhdgVersion == 7.24) {
+			log.info("-------> Data Grid version: 7.2-24");
+			configurationBuilder.version(ProtocolVersion.PROTOCOL_VERSION_24);
+			
+		} else if (rhdgVersion == 7.25) {
+			log.info("-------> Data Grid version: 7.2-25");
 			configurationBuilder.version(ProtocolVersion.PROTOCOL_VERSION_25);
+			
+		} else if (rhdgVersion == 7.25) {
+			log.info("-------> Data Grid version: 7.2-26");
+			configurationBuilder.version(ProtocolVersion.PROTOCOL_VERSION_26);
 			
 		} else if (rhdgVersion == 7.3) {
 			log.info("-------> Data Grid version: 7.3");
