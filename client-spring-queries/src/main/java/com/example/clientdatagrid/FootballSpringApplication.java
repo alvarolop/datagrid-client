@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.infinispan.client.hotrod.DataFormat;
+import org.infinispan.client.hotrod.ProtocolVersion;
 import org.infinispan.client.hotrod.RemoteCache;
 import org.infinispan.client.hotrod.RemoteCacheManager;
 import org.infinispan.client.hotrod.Search;
@@ -45,6 +46,9 @@ public class FootballSpringApplication implements CommandLineRunner {
 	@Value("${datagrid.cache}")
 	private String cacheName;
 	
+	@Value("${datagrid.version}")
+	private String rhdgVersion;
+	
 	public static RemoteCacheManager cacheManager;
 	public static RemoteCache<String, String> cacheString;
 	public static RemoteCache<String, Team> cacheTeam;
@@ -58,12 +62,24 @@ public class FootballSpringApplication implements CommandLineRunner {
 	
 	@Override
 	public void run(String... args) { 
-		Configuration configuration = new ConfigurationBuilder()
+		ConfigurationBuilder configurationBuilder = new ConfigurationBuilder()
 	    		.addServer()
 	    			.host(host)
 	    			.port(port)
-		    		.marshaller(new ProtoStreamMarshaller())
-	    		.build();
+		    		.marshaller(new ProtoStreamMarshaller());
+		
+		if (rhdgVersion == "7.2") {
+			log.info("-------> Data Grid version: 7.2");
+			configurationBuilder.version(ProtocolVersion.PROTOCOL_VERSION_25);
+			
+		} else if (rhdgVersion == "7.3") {
+			log.info("-------> Data Grid version: 7.3");
+			
+		} else {
+			log.info("-------> Data Grid version: Missconfigured");
+		}
+		Configuration configuration = configurationBuilder.build();
+		
 		
 		log.info("-------> Data Grid host: " + host);
 		log.info("-------> Data Grid port: " + port);
