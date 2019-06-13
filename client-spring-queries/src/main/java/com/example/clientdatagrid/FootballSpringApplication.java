@@ -76,7 +76,7 @@ public class FootballSpringApplication implements CommandLineRunner {
 			log.info("-------> Data Grid version: 7.2-25");
 			configurationBuilder.version(ProtocolVersion.PROTOCOL_VERSION_25);
 			
-		} else if (rhdgVersion == 7.25) {
+		} else if (rhdgVersion == 7.26) {
 			log.info("-------> Data Grid version: 7.2-26");
 			configurationBuilder.version(ProtocolVersion.PROTOCOL_VERSION_26);
 			
