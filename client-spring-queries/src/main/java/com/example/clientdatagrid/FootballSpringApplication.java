@@ -62,31 +62,23 @@ public class FootballSpringApplication implements CommandLineRunner {
 	
 	@Override
 	public void run(String... args) { 
-		ConfigurationBuilder configurationBuilder = new ConfigurationBuilder()
-	    		.addServer()
-	    			.host(host)
-	    			.port(port)
-		    		.marshaller(new ProtoStreamMarshaller());
+		ConfigurationBuilder configurationBuilder = new ConfigurationBuilder();
 		
-		if (rhdgVersion == 7.24) {
-			log.info("-------> Data Grid version: 7.2-24 (" + ProtocolVersion.PROTOCOL_VERSION_24 + ")");
-			configurationBuilder.version(ProtocolVersion.PROTOCOL_VERSION_24);
-			
-		} else if (rhdgVersion == 7.25) {
-			log.info("-------> Data Grid version: 7.2-25 (" + ProtocolVersion.PROTOCOL_VERSION_25 + ")");
+		configurationBuilder.addServer()
+	    			.host(host)
+	    			.port(port);
+		configurationBuilder.marshaller(new ProtoStreamMarshaller());
+		
+		if (rhdgVersion == 7.2) {
+			log.info("-------> Data Grid version: 7.2 (" + ProtocolVersion.PROTOCOL_VERSION_25 + ")");
 			configurationBuilder.version(ProtocolVersion.PROTOCOL_VERSION_25);
-			
-		} else if (rhdgVersion == 7.26) {
-			log.info("-------> Data Grid version: 7.2-26 (" + ProtocolVersion.PROTOCOL_VERSION_26 + ")");
-			configurationBuilder.version(ProtocolVersion.PROTOCOL_VERSION_26);
-			
+
 		} else if (rhdgVersion == 7.3) {
 			log.info("-------> Data Grid version: 7.3" );
 			
 		} else {
 			log.info("-------> Data Grid version: Missconfigured (" + rhdgVersion + ")");
 		}
-		Configuration configuration = configurationBuilder.build();
 		
 		
 		log.info("-------> Data Grid host: " + host);
@@ -103,7 +95,7 @@ public class FootballSpringApplication implements CommandLineRunner {
 //				.valueMarshaller((Marshaller) new CustomJacksonMarshaller())
 //			.build();
 		
-		cacheManager = new RemoteCacheManager(configuration);
+		cacheManager = new RemoteCacheManager(configurationBuilder.build());
 		cacheTeam = cacheManager.getCache(cacheName);
 	    cacheString = cacheManager.getCache(cacheName).withDataFormat(jsonString);
 ////	    cacheJsonNode = cacheManager.getCache("default").withDataFormat(jsonNode);
@@ -117,10 +109,10 @@ public class FootballSpringApplication implements CommandLineRunner {
 	    // Load information to the cache in several formats (Team, JSON string)
 	    cacheTeam.put("Barcelona", new Team("Barcelona", "This is the initial team", new String[]{"Messi", "Pedro", "Puyol"}));
 	    cacheTeam.put("Madrid", new Team("Madrid", "This is the second team", new String[]{"Benzema", "Ramos", "Bale"}));
-//		cacheString.put("Atleti", (new Team("Atleti", "This is the third team", new String[]{"Griezmann", "Morata", "Costa"})).toJsonString());
+		cacheString.put("Atleti", (new Team("Atleti", "This is the third team", new String[]{"Griezmann", "Morata", "Costa"})).toJsonString());
 
 		log.info("-------> Teams loaded (Team): " + cacheTeam.keySet().toString());
-//		log.info("-------> Teams loaded (String): " + cacheString.keySet().toString());
+		log.info("-------> Teams loaded (String): " + cacheString.keySet().toString());
 
 		
 		
@@ -130,77 +122,77 @@ public class FootballSpringApplication implements CommandLineRunner {
 
 		Query query1 = queryFactoryTeam.from(Team.class).having("teamName").like("Barcelona").build(); // Only for non-analyzed fields. Query DSL does not manage Full-text queries
 		Query query2 = queryFactoryTeam.create("from com.example.clientdatagrid.Team where teamName = 'Barcelona'"); // Use ":" for analyzed and "=" for non-analyzed
-//		Query query3 = queryFactoryTeam.create("from com.example.clientdatagrid.Team where teamName = 'Atleti'"); // Use ":" for analyzed and "=" for non-analyzed
+		Query query3 = queryFactoryTeam.create("from com.example.clientdatagrid.Team where teamName = 'Atleti'"); // Use ":" for analyzed and "=" for non-analyzed
 
 		log.info("----> Queries to the RemoteCache <String, Team>");
 		log.info("-------> Query 1: " + query1.list().toString());
 		log.info("-------> Query 2: " + query2.list().toString());
-//		log.info("-------> Query 3: " + query3.list().toString());
+		log.info("-------> Query 3: " + query3.list().toString());
 		
 		
 		
 		
 		// Queries to the RemoteCache <String, Team>
-//		QueryFactory queryFactoryString = Search.getQueryFactory(cacheString);
-//
-//		Query query4 = queryFactoryString.from(Team.class).having("teamName").like("Barcelona").build(); // Only for non-analyzed fields. Query DSL does not manage Full-text queries
-//		Query query5 = queryFactoryString.create("from com.example.clientdatagrid.Team where teamName = 'Barcelona'"); // Use ":" for analyzed and "=" for non-analyzed
-//		Query query6 = queryFactoryString.create("from com.example.clientdatagrid.Team where teamName = 'Atleti'"); // Use ":" for analyzed and "=" for non-analyzed
-//
-//		log.info("----> Queries to the RemoteCache <String, String>");
-//		log.info("-------> Query 4: " + query4.list().toString());
-//		log.info("-------> Query 5: " + query5.list().toString());
-//		log.info("-------> Query 6: " + query6.list().toString());
+		QueryFactory queryFactoryString = Search.getQueryFactory(cacheString);
+
+		Query query4 = queryFactoryString.from(Team.class).having("teamName").like("Barcelona").build(); // Only for non-analyzed fields. Query DSL does not manage Full-text queries
+		Query query5 = queryFactoryString.create("from com.example.clientdatagrid.Team where teamName = 'Barcelona'"); // Use ":" for analyzed and "=" for non-analyzed
+		Query query6 = queryFactoryString.create("from com.example.clientdatagrid.Team where teamName = 'Atleti'"); // Use ":" for analyzed and "=" for non-analyzed
+
+		log.info("----> Queries to the RemoteCache <String, String>");
+		log.info("-------> Query 4: " + query4.list().toString());
+		log.info("-------> Query 5: " + query5.list().toString());
+		log.info("-------> Query 6: " + query6.list().toString());
 
 
-//		// Check that data stored with Team and String can be retrieved with Team and String
-//		log.info("-------> Barcelona get (Team): " + cacheTeam.get("Barcelona"));
-//		log.info("-------> Barcelona get (String): " + cacheString.get("Barcelona"));
-//		log.info("-------> Atleti get (Team): " + cacheTeam.get("Atleti"));
-//		log.info("-------> Atleti get (String): " + cacheString.get("Atleti"));
-//		
-//		
-//		// Example: How to remove all the teams with name == Atleti
-//		log.info("-------> Query 7: " + queryFactoryString.create("from com.example.clientdatagrid.Team").list().toString());
-//		List<Team> removeList = queryFactoryTeam.create("from com.example.clientdatagrid.Team where teamName = 'Atleti'").list();
-//		log.info("-------> Remove list: " + removeList.toString());
-//		for (Team team : removeList ) {
-//			cacheTeam.remove(team.getTeamName());
-//		}
-//		
-//		List<Object[]> results =  queryFactoryTeam.create("select teamName from com.example.clientdatagrid.Team where country = 'Spain'").list();
-//		log.info("-------> List of teams: " + results.toString());
-//		for (Object[] team : results ) {
-//			log.info("-------> " + cacheTeam.get(team[0]).toString()); 
-//			cacheTeam.remove(team[0]);
-//		}
-//		
-//		
-//		Set<String> teams = queryFactoryTeam.create("select teamName from com.example.clientdatagrid.Team where country = 'Spain'")
-//				   .<Object[]>list()
-//				   .stream().map(row -> (String) row[0])
-//				   .collect(Collectors.toSet());
-//
-//		cacheTeam.keySet().removeAll(teams);
-//
-//		log.info("-------> Query 8(String): " + queryFactoryString.create("select teamName from com.example.clientdatagrid.Team").list().toString());
-//		log.info("-------> Query 8(Team): " + queryFactoryString.create("select teamName from com.example.clientdatagrid.Team").list().toString());
-//		
-//
-//
-//		
-//		// Use remote scripts to remove tasks
-//		
-//		
-//        Map<String, Object> params = new HashMap<>();
-//        params.put("key", "myKey");
-//        params.put("value", "myValue");
-// 
-//        log.info("-------> Get \"myKey\": " + cacheString.get("myKey"));
-//        Object result = cacheTeam.execute("removeEntries.js", params);
-//        log.info("-------> Get \"myKey\": " + cacheString.get("myKey"));
-//		
-//		cache.entrySet().stream().
+		// Check that data stored with Team and String can be retrieved with Team and String
+		log.info("-------> Barcelona get (Team): " + cacheTeam.get("Barcelona"));
+		log.info("-------> Barcelona get (String): " + cacheString.get("Barcelona"));
+		log.info("-------> Atleti get (Team): " + cacheTeam.get("Atleti"));
+		log.info("-------> Atleti get (String): " + cacheString.get("Atleti"));
+		
+		
+		// Example: How to remove all the teams with name == Atleti
+		log.info("-------> Query 7: " + queryFactoryString.create("from com.example.clientdatagrid.Team").list().toString());
+		List<Team> removeList = queryFactoryTeam.create("from com.example.clientdatagrid.Team where teamName = 'Atleti'").list();
+		log.info("-------> Remove list: " + removeList.toString());
+		for (Team team : removeList ) {
+			cacheTeam.remove(team.getTeamName());
+		}
+		
+		List<Object[]> results =  queryFactoryTeam.create("select teamName from com.example.clientdatagrid.Team where country = 'Spain'").list();
+		log.info("-------> List of teams: " + results.toString());
+		for (Object[] team : results ) {
+			log.info("-------> " + cacheTeam.get(team[0]).toString()); 
+			cacheTeam.remove(team[0]);
+		}
+		
+		
+		Set<String> teams = queryFactoryTeam.create("select teamName from com.example.clientdatagrid.Team where country = 'Spain'")
+				   .<Object[]>list()
+				   .stream().map(row -> (String) row[0])
+				   .collect(Collectors.toSet());
+
+		cacheTeam.keySet().removeAll(teams);
+
+		log.info("-------> Query 8(String): " + queryFactoryString.create("select teamName from com.example.clientdatagrid.Team").list().toString());
+		log.info("-------> Query 8(Team): " + queryFactoryString.create("select teamName from com.example.clientdatagrid.Team").list().toString());
+		
+
+
+		
+		// Use remote scripts to remove tasks
+		
+		
+        Map<String, Object> params = new HashMap<>();
+        params.put("key", "myKey");
+        params.put("value", "myValue");
+ 
+        log.info("-------> Get \"myKey\": " + cacheString.get("myKey"));
+        Object result = cacheTeam.execute("removeEntries.js", params);
+        log.info("-------> Get \"myKey\": " + cacheString.get("myKey"));
+		
+		cache.entrySet().stream().
 
 //		ObjectMapper objectMapper = new ObjectMapper();
 //	    String teamAsString = "";

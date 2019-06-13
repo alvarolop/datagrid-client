@@ -16,6 +16,7 @@
  */
 package com.example.clientdatagrid;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -25,9 +26,10 @@ import org.infinispan.protostream.annotations.ProtoDoc;
 import org.infinispan.protostream.annotations.ProtoField;
 
 @ProtoDoc("@Indexed")
-public class Team {
+public class Team implements Serializable {
 
-    private String teamName;
+	private static final long serialVersionUID = 1L;
+	private String teamName;
     private String description;
     private List<String> players;
     
