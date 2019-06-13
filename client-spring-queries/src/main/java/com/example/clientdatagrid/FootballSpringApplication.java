@@ -160,7 +160,7 @@ public class FootballSpringApplication implements CommandLineRunner {
 			cacheTeam.remove(team.getTeamName());
 		}
 		
-		List<Object[]> results =  queryFactoryTeam.create("select teamName from com.example.clientdatagrid.Team where country = 'Spain'").list();
+		List<Object[]> results =  queryFactoryTeam.create("select teamName from com.example.clientdatagrid.Team where teamName = 'Atleti'").list();
 		log.info("-------> List of teams: " + results.toString());
 		for (Object[] team : results ) {
 			log.info("-------> " + cacheTeam.get(team[0]).toString()); 
@@ -168,7 +168,7 @@ public class FootballSpringApplication implements CommandLineRunner {
 		}
 		
 		
-		Set<String> teams = queryFactoryTeam.create("select teamName from com.example.clientdatagrid.Team where country = 'Spain'")
+		Set<String> teams = queryFactoryTeam.create("select teamName from com.example.clientdatagrid.Team where teamName = 'Atleti'")
 				   .<Object[]>list()
 				   .stream().map(row -> (String) row[0])
 				   .collect(Collectors.toSet());
