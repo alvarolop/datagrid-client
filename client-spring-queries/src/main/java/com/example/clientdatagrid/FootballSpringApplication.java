@@ -192,7 +192,7 @@ public class FootballSpringApplication implements CommandLineRunner {
         Object result = cacheTeam.execute("removeEntries.js", params);
         log.info("-------> Get \"myKey\": " + cacheString.get("myKey"));
 		
-		cache.entrySet().stream().
+//		cache.entrySet().stream().
 
 //		ObjectMapper objectMapper = new ObjectMapper();
 //	    String teamAsString = "";
