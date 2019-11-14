@@ -12,7 +12,7 @@ import com.example.springcache.controller.StudentNotFoundException;
 import com.example.springcache.model.Student;
 
 @Service
-@CacheConfig(cacheNames="default")
+@CacheConfig(cacheNames="student")
 public class StudentRepo {
 	
     Logger log = LoggerFactory.getLogger(this.getClass());

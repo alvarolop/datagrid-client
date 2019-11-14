@@ -1,6 +1,7 @@
 package me.ignaciosanchez.hotrodtester.service;
 
 import org.infinispan.client.hotrod.RemoteCache;
+
 import org.infinispan.client.hotrod.RemoteCacheManager;
 import org.infinispan.commons.configuration.XMLStringConfiguration;
 import org.infinispan.configuration.cache.CacheMode;
@@ -19,29 +20,23 @@ import java.util.Random;
 @RestController
 @org.springframework.context.annotation.Configuration
 public class Tester {
+	
+	private final RemoteCacheManager rcm;
 
 	@Autowired
-	RemoteCacheManager rcm;
+	public Tester(RemoteCacheManager cacheManager) {
+	    this.rcm = cacheManager;
+	}
 
 	@Value("${datagrid.host}")
 	private String host;
 
 	@Value("${datagrid.port}")
 	private String port;
-	
-    @Value("${datagrid.authentication}")
-    private String authentication;
-    
-    @Value("${datagrid.username}")
-    private String username;
-
-    @Value("${datagrid.password}")
-    private String password;
 
 	@GetMapping("/api/info")
 	public String info() {
-		String value = "Connection to: " + host + " and port " + port + " with security (" + Boolean.valueOf(authentication) + "). "
-				+ "Using security with " + username + "/" + password + ".\n";
+		String value = "Connection to: " + host + " and port " + port; 
 		return value;
 	}
 
@@ -69,16 +64,16 @@ public class Tester {
 		return rcm.getCacheNames().toString();
 	}
 
-	@GetMapping("/api/cache/{cache}/stats")
-	public String stats(@PathVariable(value = "cache") String cacheName) {
-
-		return rcm.getCache(cacheName).stats().getStatsMap().toString();
-	}
+//	@GetMapping("/api/cache/{cache}/stats")
+//	public String stats(@PathVariable(value = "cache") String cacheName) {
+//
+//		return rcm.getCache(cacheName).stats().getStatsMap().toString();
+//	}
 	
 	@GetMapping("/api/cache/{cache}/stats-client")
 	public String clientStats(@PathVariable(value = "cache") String cacheName) {
 
-		return rcm.getCache(cacheName).clientStatistics().toString();
+		return Long.toString(rcm.getCache(cacheName).clientStatistics().getAverageRemoteReadTime());
 	}
 	
 	@GetMapping("/api/cache/{cache}/stats-server")
@@ -96,7 +91,7 @@ public class Tester {
 		// rcm.administration().getOrCreateCache(cacheName, config);
 		rcm.administration().getOrCreateCache(cacheName, new XMLStringConfiguration(config.toXMLString()));
 
-		return rcm.getCache(cacheName).stats().getStatsMap().toString();
+		return rcm.getCache(cacheName).serverStatistics().getStatsMap().toString();
 	}
 
 	@GetMapping("/api/cache/{cache}/put")
@@ -105,6 +100,10 @@ public class Tester {
 			@RequestParam(value = "minkey", required = false) Integer entryMinkey) {
 
 		RemoteCache<String, byte[]> cache = rcm.getCache(cacheName);
+		
+//		RemoteCache<String, String> cache2 = rcm.getCache(cacheName);
+//		String jsonString = "{\"id\":\"3\",\"name\":\"John Doe\",\"email\":\"john.doe@example.com\"}";	      
+//		cache2.put("1", jsonString);
 
 		int min = 0;
 		if (entryMinkey != null)
@@ -122,6 +121,7 @@ public class Tester {
 			rnd.nextBytes(bytes);
 
 			cache.put(Integer.toString(i), bytes);
+			
 		}
 
 		return "OK " + numEntries + " " + entrySize + " " + entryMinkey;
@@ -141,7 +141,7 @@ public class Tester {
 			cache.get(Integer.toString(i));
 		}
 
-		return "OK " + numEntries + " " + entryMinkey;
+		return "OK " + cache.get(Integer.toString(1)) + " " + entryMinkey;
 	}
 
 	@GetMapping("/api/cache/{cache}/get-single")

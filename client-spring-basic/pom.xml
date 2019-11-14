@@ -52,15 +52,15 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
-        <dependency>
-		    <groupId>com.fasterxml.jackson.core</groupId>
-		    <artifactId>jackson-databind</artifactId>
-		    <version>2.9.8.redhat-00004</version>
-		</dependency>
-		<dependency>
-		    <groupId>org.infinispan</groupId>
-		    <artifactId>infinispan-remote-query-client</artifactId>
-		</dependency>
+<!--         <dependency> -->
+<!-- 		    <groupId>com.fasterxml.jackson.core</groupId> -->
+<!-- 		    <artifactId>jackson-databind</artifactId> -->
+<!-- 		    <version>2.9.8.redhat-00004</version> -->
+<!-- 		</dependency> -->
+<!-- 		<dependency> -->
+<!-- 		    <groupId>org.infinispan</groupId> -->
+<!-- 		    <artifactId>infinispan-remote-query-client</artifactId> -->
+<!-- 		</dependency> -->
 	</dependencies>
 	
 	<build>

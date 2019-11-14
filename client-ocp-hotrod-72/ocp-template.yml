@@ -87,7 +87,7 @@ objects:
       spec:
         containers:
         - name: ${APPLICATION_NAME}
-          image: 172.30.1.1:5000/${APPLICATION_NAMESPACE}/${APPLICATION_NAME}@sha256:e33621ad79cf17b9537a058a85a3089549652ce6e10ed6bb83fc36bfb674c336
+          image: srv14.info.net:5000/${APPLICATION_NAMESPACE}/${APPLICATION_NAME}
           imagePullPolicy: Always
           ports:
           - containerPort: 8080
@@ -103,7 +103,7 @@ objects:
         volumes:
         - name: springboot-config
           configMap:
-            name: ${APPLICATION_NAME}-file-config
+            name: ${APPLICATION_NAME}
     test: false
 - apiVersion: build.openshift.io/v1
   kind: BuildConfig
@@ -131,7 +131,7 @@ objects:
       sourceStrategy:
         from:
           kind: ImageStreamTag
-          name: redhat-openjdk18-openshift:1.4
+          name: redhat-openjdk18-openshift:latest
           namespace: openshift
       type: Source
     successfulBuildsHistoryLimit: 5
@@ -143,9 +143,7 @@ objects:
         secret: Y4t9MSNFeWuE6lgvBByV
       type: Generic
     - type: ConfigChange
-    - imageChange:
-        lastTriggeredImageID: 172.30.1.1:5000/openshift/redhat-openjdk18-openshift@sha256:dc84fed0f6f40975a2277c126438c8aa15c70eeac75981dbaa4b6b853eff61a6
-      type: ImageChange
+    - type: ImageChange
   status:
     lastVersion: 1
 parameters:
