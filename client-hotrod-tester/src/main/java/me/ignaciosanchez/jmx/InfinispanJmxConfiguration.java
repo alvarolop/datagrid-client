@@ -1,4 +1,4 @@
-package me.ignaciosanchez.hotrodtester.jmx;
+package me.ignaciosanchez.jmx;
 
 import javax.annotation.PostConstruct;
 
