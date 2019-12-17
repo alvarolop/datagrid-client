@@ -12,6 +12,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Arrays;
 import java.util.Random;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 @RestController
 public class TestController {
@@ -80,36 +83,35 @@ public class TestController {
     public String put(
             @PathVariable(value = "cache") String cacheName,
             @RequestParam(value = "entries") int numEntries,
-            @RequestParam(value = "size", required=false) Integer entrySize,
-            @RequestParam(value = "minkey", required=false) Integer entryMinkey,
+            @RequestParam(value = "async", defaultValue = "false") boolean isAsync,
+            @RequestParam(value = "asyncTime", defaultValue = "500") int asyncTime,
+            @RequestParam(value = "size", defaultValue = "1024") int entrySize,
+            @RequestParam(value = "minkey", defaultValue = "0") int minKey,
             @RequestParam(value = "keyrange", required=false) Integer entryKeyRange) {
 
         RemoteCache<String, byte[]> cache = rcm.getCache(cacheName);
-
-        int min = 0;
-        if (entryMinkey != null)
-            min = entryMinkey;
-
-        int size = 1024;
-        if (entrySize != null)
-            size = entrySize;
 
         int keyrange = numEntries;
         if (entryKeyRange != null)
             keyrange = entryKeyRange;
 
-        byte[] bytes = new byte[size];
+        byte[] bytes = new byte[entrySize];
         Random rnd = new Random();
 
         int key = 0;
 
-        for (int i=min; i<(min + numEntries) ; i++) {
+        for (int i=minKey; i<(minKey + numEntries) ; i++) {
 
             rnd.nextBytes(bytes);
 
             try {
-                cache.put(Integer.toString(key + min), bytes);
-                logger.info("put ok " + i);
+            	if (isAsync) {
+                    cache.put(Integer.toString(key + minKey), bytes, asyncTime, TimeUnit.MILLISECONDS);
+                    logger.info("put ok " + i + " Async");            		
+            	} else {
+                    cache.put(Integer.toString(key + minKey), bytes);
+                    logger.info("put ok " + i);            		
+            	}
             }
             catch (Exception e) {
                 logger.error("Exception in put " + i, e);
@@ -119,26 +121,36 @@ public class TestController {
             key%=keyrange;
         }
 
-        return "OK " + numEntries + " " + entrySize + " " + entryMinkey;
+        return "OK " + numEntries + " " + entrySize + " " + minKey;
     }
 
     @GetMapping("/api/cache/{cache}/get")
     public String get(
             @PathVariable(value = "cache") String cacheName,
             @RequestParam(value = "entries") int numEntries,
-            @RequestParam(value = "minkey", required=false) Integer entryMinkey) {
+            @RequestParam(value = "async", defaultValue = "false") boolean isAsync,
+            @RequestParam(value = "asyncTime", defaultValue = "500") int asyncTime,
+            @RequestParam(value = "minkey", defaultValue = "0") int minKey) {
 
         RemoteCache<String, byte[]> cache = rcm.getCache(cacheName);
 
-        int min = 0;
-        if (entryMinkey != null)
-            min = entryMinkey;
-
-        for (int i=min; i<(min + numEntries) ; i++) {
-            cache.get(Integer.toString(i));
+        for (int i=minKey; i<(minKey + numEntries) ; i++) {
+        	if (isAsync) {
+                try {
+					cache.getAsync(Integer.toString(i)).get(asyncTime, TimeUnit.MILLISECONDS);
+				} catch (InterruptedException | ExecutionException | TimeoutException e) {
+					logger.error("Exception in put async " + i, e);
+					e.printStackTrace();
+				}
+                logger.info("get ok " + i + " Async");            		
+        	} else {
+        		cache.get(Integer.toString(i));  
+        		logger.info("get ok " + i);  
+        	}
+            
         }
 
-        return "OK " + numEntries + " " + entryMinkey;
+        return "OK " + numEntries + " " + minKey;
     }
 
     @GetMapping("/api/cache/{cache}/get-single")
