@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Arrays;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 @RestController
 public class TestController {
@@ -109,6 +110,52 @@ public class TestController {
 
             try {
                 cache.put(Integer.toString(key + min), bytes);
+                logger.info("put ok " + i);
+            }
+            catch (Exception e) {
+                logger.error("Exception in put " + i, e);
+            }
+
+            key++;
+            key%=keyrange;
+        }
+
+        return "OK " + numEntries + " " + entrySize + " " + entryMinkey;
+    }
+    
+    @GetMapping("/api/cache/{cache}/put-async")
+    public String putAsync(
+            @PathVariable(value = "cache") String cacheName,
+            @RequestParam(value = "entries") int numEntries,
+            @RequestParam(value = "size", required=false) Integer entrySize,
+            @RequestParam(value = "minkey", required=false) Integer entryMinkey,
+            @RequestParam(value = "keyrange", required=false) Integer entryKeyRange) {
+
+        RemoteCache<String, byte[]> cache = rcm.getCache(cacheName);
+
+        int min = 0;
+        if (entryMinkey != null)
+            min = entryMinkey;
+
+        int size = 1024;
+        if (entrySize != null)
+            size = entrySize;
+
+        int keyrange = numEntries;
+        if (entryKeyRange != null)
+            keyrange = entryKeyRange;
+
+        byte[] bytes = new byte[size];
+        Random rnd = new Random();
+
+        int key = 0;
+
+        for (int i=min; i<(min + numEntries) ; i++) {
+
+            rnd.nextBytes(bytes);
+
+            try {
+                cache.put(Integer.toString(key + min), bytes, 500, TimeUnit.MILLISECONDS);
                 logger.info("put ok " + i);
             }
             catch (Exception e) {

@@ -165,5 +165,5 @@ parameters:
   required: true
 - name: GIT_CONTEXT_DIR
   description: "The namespace of the application."
-  value: "client-hotrod-tester"
+  value: "client-hotrod-tester-734"
   required: true

@@ -34,7 +34,7 @@ oc rollout latest $app_name -n $namespace
 
 
 ## Set environment variables
-oc set env dc $app_name DATAGRID_HOST=rhdg73-2-server DATAGRID_PORT=11222 -n $namespace
+oc set env dc $app_name DATAGRID_HOST=rhdg73-4-server DATAGRID_PORT=11222 -n $namespace
 oc set env dc $app_name --list
 ```
 
