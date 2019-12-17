@@ -75,42 +75,39 @@ public class TestController {
 */
         return "ok";
     }
-
-
+    
     @GetMapping("/api/cache/{cache}/put")
     public String put(
             @PathVariable(value = "cache") String cacheName,
             @RequestParam(value = "entries") int numEntries,
-            @RequestParam(value = "size", required=false) Integer entrySize,
-            @RequestParam(value = "minkey", required=false) Integer entryMinkey,
+            @RequestParam(value = "async",defaultValue = "false") boolean isAsync,
+            @RequestParam(value = "size", defaultValue = "1024") Integer entrySize,
+            @RequestParam(value = "minkey", defaultValue = "0") Integer minKey,
             @RequestParam(value = "keyrange", required=false) Integer entryKeyRange) {
 
         RemoteCache<String, byte[]> cache = rcm.getCache(cacheName);
-
-        int min = 0;
-        if (entryMinkey != null)
-            min = entryMinkey;
-
-        int size = 1024;
-        if (entrySize != null)
-            size = entrySize;
 
         int keyrange = numEntries;
         if (entryKeyRange != null)
             keyrange = entryKeyRange;
 
-        byte[] bytes = new byte[size];
+        byte[] bytes = new byte[entrySize];
         Random rnd = new Random();
 
         int key = 0;
 
-        for (int i=min; i<(min + numEntries) ; i++) {
+        for (int i=minKey; i<(minKey + numEntries) ; i++) {
 
             rnd.nextBytes(bytes);
 
             try {
-                cache.put(Integer.toString(key + min), bytes);
-                logger.info("put ok " + i);
+            	if (isAsync) {
+                    cache.put(Integer.toString(key + minKey), bytes, 500, TimeUnit.MILLISECONDS);
+                    logger.info("put ok " + i + " Async");            		
+            	} else {
+                    cache.put(Integer.toString(key + minKey), bytes);
+                    logger.info("put ok " + i);            		
+            	}
             }
             catch (Exception e) {
                 logger.error("Exception in put " + i, e);
@@ -120,53 +117,7 @@ public class TestController {
             key%=keyrange;
         }
 
-        return "OK " + numEntries + " " + entrySize + " " + entryMinkey;
-    }
-    
-    @GetMapping("/api/cache/{cache}/put-async")
-    public String putAsync(
-            @PathVariable(value = "cache") String cacheName,
-            @RequestParam(value = "entries") int numEntries,
-            @RequestParam(value = "size", required=false) Integer entrySize,
-            @RequestParam(value = "minkey", required=false) Integer entryMinkey,
-            @RequestParam(value = "keyrange", required=false) Integer entryKeyRange) {
-
-        RemoteCache<String, byte[]> cache = rcm.getCache(cacheName);
-
-        int min = 0;
-        if (entryMinkey != null)
-            min = entryMinkey;
-
-        int size = 1024;
-        if (entrySize != null)
-            size = entrySize;
-
-        int keyrange = numEntries;
-        if (entryKeyRange != null)
-            keyrange = entryKeyRange;
-
-        byte[] bytes = new byte[size];
-        Random rnd = new Random();
-
-        int key = 0;
-
-        for (int i=min; i<(min + numEntries) ; i++) {
-
-            rnd.nextBytes(bytes);
-
-            try {
-                cache.put(Integer.toString(key + min), bytes, 500, TimeUnit.MILLISECONDS);
-                logger.info("put ok " + i);
-            }
-            catch (Exception e) {
-                logger.error("Exception in put " + i, e);
-            }
-
-            key++;
-            key%=keyrange;
-        }
-
-        return "OK " + numEntries + " " + entrySize + " " + entryMinkey;
+        return "OK " + numEntries + " " + entrySize + " " + minKey;
     }
 
     @GetMapping("/api/cache/{cache}/get")
