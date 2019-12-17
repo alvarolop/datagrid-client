@@ -12,7 +12,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Arrays;
 import java.util.Random;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 @RestController
 public class TestController {
@@ -80,9 +82,10 @@ public class TestController {
     public String put(
             @PathVariable(value = "cache") String cacheName,
             @RequestParam(value = "entries") int numEntries,
-            @RequestParam(value = "async",defaultValue = "false") boolean isAsync,
-            @RequestParam(value = "size", defaultValue = "1024") Integer entrySize,
-            @RequestParam(value = "minkey", defaultValue = "0") Integer minKey,
+            @RequestParam(value = "async", defaultValue = "false") boolean isAsync,
+            @RequestParam(value = "asyncTime", defaultValue = "500") int asyncTime,
+            @RequestParam(value = "size", defaultValue = "1024") int entrySize,
+            @RequestParam(value = "minkey", defaultValue = "0") int minKey,
             @RequestParam(value = "keyrange", required=false) Integer entryKeyRange) {
 
         RemoteCache<String, byte[]> cache = rcm.getCache(cacheName);
@@ -102,7 +105,7 @@ public class TestController {
 
             try {
             	if (isAsync) {
-                    cache.put(Integer.toString(key + minKey), bytes, 500, TimeUnit.MILLISECONDS);
+                    cache.put(Integer.toString(key + minKey), bytes, asyncTime, TimeUnit.MILLISECONDS);
                     logger.info("put ok " + i + " Async");            		
             	} else {
                     cache.put(Integer.toString(key + minKey), bytes);
@@ -124,19 +127,29 @@ public class TestController {
     public String get(
             @PathVariable(value = "cache") String cacheName,
             @RequestParam(value = "entries") int numEntries,
-            @RequestParam(value = "minkey", required=false) Integer entryMinkey) {
+            @RequestParam(value = "async", defaultValue = "false") boolean isAsync,
+            @RequestParam(value = "asyncTime", defaultValue = "500") int asyncTime,
+            @RequestParam(value = "minkey", defaultValue = "0") int minKey) {
 
         RemoteCache<String, byte[]> cache = rcm.getCache(cacheName);
 
-        int min = 0;
-        if (entryMinkey != null)
-            min = entryMinkey;
-
-        for (int i=min; i<(min + numEntries) ; i++) {
-            cache.get(Integer.toString(i));
+        for (int i=minKey; i<(minKey + numEntries) ; i++) {
+        	if (isAsync) {
+                try {
+					cache.getAsync(Integer.toString(i)).get(asyncTime, TimeUnit.MILLISECONDS);
+				} catch (InterruptedException | ExecutionException | TimeoutException e) {
+					logger.error("Exception in put async " + i, e);
+					e.printStackTrace();
+				}
+                logger.info("get ok " + i + " Async");            		
+        	} else {
+        		cache.get(Integer.toString(i));  
+        		logger.info("get ok " + i);  
+        	}
+            
         }
 
-        return "OK " + numEntries + " " + entryMinkey;
+        return "OK " + numEntries + " " + minKey;
     }
 
     @GetMapping("/api/cache/{cache}/get-single")
